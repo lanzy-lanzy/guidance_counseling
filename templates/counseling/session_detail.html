@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block title %}Guidance Session - Guidance Counseling System{% endblock %}
+
+{% block navigation %}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-50">
+    <!-- Include Sidebar -->
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col ml-64">
+        <!-- Top Navigation -->
+        {% include 'includes/topbar.html' %}
+        
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <div class="max-w-4xl mx-auto">
+                <!-- Header Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-indigo-100 rounded-full mr-4">
+                                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-3xl font-bold text-gray-900">Guidance Session</h1>
+                                <p class="text-gray-500 mt-1">Session ID: {{ session.id }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="px-4 py-2 text-sm font-medium rounded-full flex items-center
+                                {% if session.status == 'scheduled' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% elif session.status == 'in_progress' %}
+                                    bg-green-100 text-green-800
+                                {% elif session.status == 'completed' %}
+                                    bg-blue-100 text-blue-800
+                                {% else %}
+                                    bg-red-100 text-red-800
+                                {% endif %}">
+                                <span class="w-2 h-2 rounded-full mr-2 
+                                    {% if session.status == 'scheduled' %}
+                                        bg-yellow-500
+                                    {% elif session.status == 'in_progress' %}
+                                        bg-green-500
+                                    {% elif session.status == 'completed' %}
+                                        bg-blue-500
+                                    {% else %}
+                                        bg-red-500
+                                    {% endif %}">
+                                </span>
+                                {{ session.get_status_display }}
+                            </span>
+                            {% if request.user.role == 'Counselor' %}
+                                <div class="mt-6 flex space-x-3">
+                                    {% if session.status == 'scheduled' %}
+                                        <form method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" name="start_session"
+                                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                Start Session
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if session.status == 'completed' and session.followup and not session.followup.completed %}
+                                        <a href="{% url 'start_followup_session' session.id %}"
+                                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                            Start Follow-up Session
+                                        </a>
+                                    {% endif %}
+
+                                    {% if session.status == 'in_progress' %}
+                                        <button type="button" onclick="showEndSessionModal()"
+                                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                            End Session
+                                        </button>
+                                    {% endif %}
+
+                                    {% if session.status in 'scheduled,in_progress' %}
+                                        <form method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" name="cancel_session"
+                                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                Cancel Session
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Information Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Session Details Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">Session Details</h2>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-40 flex-shrink-0">
+                                    <span class="text-sm font-medium text-gray-500">Session Type</span>
+                                </div>
+                                <span class="text-sm text-gray-900">{{ session.get_session_type_display }}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-40 flex-shrink-0">
+                                    <span class="text-sm font-medium text-gray-500">Date</span>
+                                </div>
+                                <span class="text-sm text-gray-900">{{ session.date }}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-40 flex-shrink-0">
+                                    <span class="text-sm font-medium text-gray-500">Started At</span>
+                                </div>
+                                <span class="text-sm text-gray-900">{{ session.time_started|default:"Not started" }}</span>
+                            </div>
+                            {% if session.time_ended %}
+                            <div class="flex items-center">
+                                <div class="w-40 flex-shrink-0">
+                                    <span class="text-sm font-medium text-gray-500">Ended At</span>
+                                </div>
+                                <span class="text-sm text-gray-900">{{ session.time_ended }}</span>
+                            </div>
+                            {% endif %}
+                            {% if session.duration %}
+                            <div class="flex items-center">
+                                <div class="w-40 flex-shrink-0">
+                                    <span class="text-sm font-medium text-gray-500">Duration</span>
+                                </div>
+                                <span class="text-sm text-gray-900">{{ session.duration }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Participants Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">Participants</h2>
+                        </div>
+                        <div class="p-6">
+                            <!-- Student Section -->
+                            <div class="mb-6">
+                                <h3 class="text-sm font-medium text-gray-500 mb-3">Student</h3>
+                                <div class="flex items-center">
+                                    {% if session.student.user.profile_picture %}
+                                        <img src="{{ session.student.user.profile_picture.url }}" alt="Student" class="h-10 w-10 rounded-full mr-3">
+                                    {% else %}
+                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ session.student.user.get_full_name }}</p>
+                                        <p class="text-xs text-gray-500">{{ session.student.course }} - Year {{ session.student.year }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Counselor Section -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500 mb-3">Counselor</h3>
+                                <div class="flex items-center">
+                                    {% if session.counselor.user.profile_picture %}
+                                        <img src="{{ session.counselor.user.profile_picture.url }}" alt="Counselor" class="h-10 w-10 rounded-full mr-3">
+                                    {% else %}
+                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ session.counselor.user.get_full_name }}</p>
+                                        <p class="text-xs text-gray-500">Guidance Counselor</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if request.user.role == 'Counselor' and session.status == 'in_progress' %}
+                <!-- Session Form -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                    <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Session Notes</h2>
+                        <p class="text-sm text-gray-600 mt-1">Record the session details and recommendations</p>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" class="space-y-6">
+                            {% csrf_token %}
+                            <div>
+                                <label for="problem_statement" class="block text-sm font-medium text-gray-700 mb-2">Problem Statement</label>
+                                <textarea id="problem_statement" name="problem_statement" rows="4"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Describe the main concerns or issues discussed...">{{ session.problem_statement }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Session Notes</label>
+                                <textarea id="notes" name="notes" rows="4"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Record detailed notes about the session...">{{ session.notes }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="action_items" class="block text-sm font-medium text-gray-700 mb-2">Action Items</label>
+                                <textarea id="action_items" name="action_items" rows="4"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="List specific actions to be taken...">{{ session.action_items }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="recommendations" class="block text-sm font-medium text-gray-700 mb-2">Recommendations</label>
+                                <textarea id="recommendations" name="recommendations" rows="4"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Provide recommendations and next steps...">{{ session.recommendations }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="next_steps" class="block text-sm font-medium text-gray-700 mb-2">Next Steps</label>
+                                <textarea id="next_steps" name="next_steps" rows="4"
+                                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Outline the next steps and follow-up plan...">{{ session.next_steps }}</textarea>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <button type="submit" name="update_session" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Save Progress
+                                </button>
+                                <button type="submit" name="end_session" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    End Session
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if session.status == 'completed' %}
+                <!-- Session Summary -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                    <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Session Summary</h2>
+                    </div>
+                    <div class="p-6 space-y-6">
+                        {% if session.problem_statement %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Problem Statement</h3>
+                            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ session.problem_statement }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if session.notes %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Session Notes</h3>
+                            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ session.notes }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if session.action_items %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Action Items</h3>
+                            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ session.action_items }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if session.recommendations %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Recommendations</h3>
+                            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ session.recommendations }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if session.next_steps %}
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Next Steps</h3>
+                            <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ session.next_steps }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Follow-up Section -->
+                {% if session.status == 'completed' %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-800">Follow-up</h2>
+                    </div>
+                    <div class="p-6">
+                        {% if session.followup %}
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Scheduled for: {{ session.followup.followup_date }}</p>
+                                        <p class="text-sm text-gray-500">Status: {{ session.followup.completed|yesno:"Completed,Pending" }}</p>
+                                    </div>
+                                    {% if request.user.role == 'Counselor' and not session.followup.completed %}
+                                    <form method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <div class="flex items-center space-x-4">
+                                            <textarea name="followup_notes" class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                placeholder="Add follow-up notes..."></textarea>
+                                            <button type="submit" name="complete_followup" 
+                                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                Complete Follow-up
+                                            </button>
+                                        </div>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                {% if session.followup.followup_notes %}
+                                <div>
+                                    <h3 class="text-sm font-medium text-gray-700 mb-2">Follow-up Notes</h3>
+                                    <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ session.followup.followup_notes }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% elif request.user.role == 'Counselor' %}
+                            <form method="POST" class="space-y-4">
+                                {% csrf_token %}
+                                <div>
+                                    <label for="followup_date" class="block text-sm font-medium text-gray-700 mb-2">Schedule Follow-up</label>
+                                    <input type="date" id="followup_date" name="followup_date" required
+                                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                                <button type="submit" name="schedule_followup"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Schedule Follow-up
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Guidance Counseling System{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Fixed Sidebar -->
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content Area -->
+    <div class="flex-1 ml-64">
+        <!-- Main Content -->
+        <main class="p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                {% if user.is_staff %}
+                <!-- Counselor Dashboard Content -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-indigo-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-indigo-700">Upcoming Sessions</h3>
+                        <p class="text-3xl font-bold text-indigo-900 mt-2">{{ today_sessions_count }}</p>
+                        <p class="text-sm text-indigo-600">Today's appointments</p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-green-700">Total Students</h3>
+                        <p class="text-3xl font-bold text-green-900 mt-2">{{ total_students }}</p>
+                        <p class="text-sm text-green-600">Active students</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-purple-700">Pending Appointments</h3>
+                        <p class="text-3xl font-bold text-purple-900 mt-2">{{ pending_appointments }}</p>
+                        <p class="text-sm text-purple-600">Awaiting approval</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="mt-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+                    <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
+                        <!-- Counselor Activity -->
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="space-y-4">
+                                {% for appointment in recent_appointments %}
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
+                                            <span class="text-sm font-medium leading-none text-blue-600">
+                                                {{ appointment.student.user.get_initials }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ appointment.get_status_display }} appointment from {{ appointment.student.user.get_full_name }}
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            Scheduled for {{ appointment.date|date:"F j, Y" }} at {{ appointment.time|time:"g:i A" }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'appointment_list' %}?status={{ appointment.status }}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                                            View →
+                                        </a>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p class="text-sm text-gray-500">No recent appointments</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Student Dashboard Content -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-indigo-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-indigo-700">Next Session</h3>
+                        {% if next_appointment %}
+                            <p class="text-xl font-bold text-indigo-900 mt-2">
+                                {{ next_appointment.date|date:"F j" }}, {{ next_appointment.time|time:"g:i A" }}
+                            </p>
+                            <p class="text-sm text-indigo-600">With {{ next_appointment.counselor.user.get_full_name }}</p>
+                        {% else %}
+                            <p class="text-xl font-bold text-indigo-900 mt-2">No upcoming sessions</p>
+                            <p class="text-sm text-indigo-600">Schedule one now!</p>
+                        {% endif %}
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-green-700">Total Sessions</h3>
+                        <p class="text-3xl font-bold text-green-900 mt-2">{{ total_sessions }}</p>
+                        <p class="text-sm text-green-600">Sessions completed</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-purple-700">Pending Follow-ups</h3>
+                        <p class="text-3xl font-bold text-purple-900 mt-2">{{ pending_followups }}</p>
+                        <p class="text-sm text-purple-600">Follow-up sessions due</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="mt-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Sessions</h2>
+                    <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
+                        <div class="px-4 py-5 sm:p-6">
+                            <div class="space-y-4">
+                                {% for session in recent_sessions %}
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
+                                            <span class="text-sm font-medium leading-none text-blue-600">
+                                                {{ session.counselor.user.get_initials }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ session.session_type }} Session
+                                        </p>
+                                        <p class="text-sm text-gray-500">
+                                            {{ session.date|date:"F j, Y" }} with {{ session.counselor.user.get_full_name }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="#" class="text-sm text-indigo-600 hover:text-indigo-800">
+                                            View Details →
+                                        </a>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p class="text-sm text-gray-500">No recent sessions</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Include Alpine.js for dropdown functionality -->
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}

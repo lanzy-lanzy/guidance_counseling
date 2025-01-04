@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+{% if current_status %}
+    {{ current_status|title }} Appointments - Guidance Counseling System
+{% else %}
+    All Appointments - Guidance Counseling System
+{% endif %}
+{% endblock %}
+
+{% block navigation %}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Include Sidebar -->
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col ml-64">
+        <!-- Top Navigation -->
+        {% include 'includes/topbar.html' %}
+        
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <div class="container mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-800">
+                            {% if current_status %}
+                                {{ current_status|title }} Appointments
+                            {% else %}
+                                All Appointments
+                            {% endif %}
+                        </h1>
+                        {% if current_status %}
+                        <a href="{% url 'appointment_list' %}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                            View all appointments
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% if not is_counselor %}
+                    <a href="{% url 'schedule_session' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                        Schedule New Appointment
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                    <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} rounded-md">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if appointments %}
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                {% if is_counselor %}
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                {% else %}
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Counselor</th>
+                                {% endif %}
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                {% if is_counselor %}
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for appointment in appointments %}
+                            <tr class="hover:bg-gray-50">
+                                {% if is_counselor %}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            {% if appointment.student.user.profile_picture %}
+                                                <img class="h-8 w-8 rounded-full mr-3" src="{{ appointment.student.user.profile_picture.url }}" alt="">
+                                            {% endif %}
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ appointment.student.user.get_full_name|default:appointment.student.user.username }}</div>
+                                                <div class="text-sm text-gray-500">{{ appointment.student.course }} - Year {{ appointment.student.year }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% else %}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            {% if appointment.counselor.user.profile_picture %}
+                                                <img class="h-8 w-8 rounded-full mr-3" src="{{ appointment.counselor.user.profile_picture.url }}" alt="">
+                                            {% endif %}
+                                            <div class="text-sm font-medium text-gray-900">{{ appointment.counselor.user.get_full_name|default:appointment.counselor.user.username }}</div>
+                                        </div>
+                                    </td>
+                                {% endif %}
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ appointment.date|date:"F d, Y" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ appointment.time|time:"g:i A" }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    <div class="max-w-xs truncate">{{ appointment.purpose }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if appointment.status == 'approved' %}
+                                            bg-green-100 text-green-800
+                                        {% elif appointment.status == 'declined' %}
+                                            bg-red-100 text-red-800
+                                        {% else %}
+                                            bg-yellow-100 text-yellow-800
+                                        {% endif %}">
+                                        {{ appointment.status|title }}
+                                    </span>
+                                </td>
+                                {% if is_counselor %}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            {% if appointment.status == 'pending' %}
+                                                <form method="post" action="{% url 'update_appointment_status' appointment.id %}" class="inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="approved">
+                                                    <button type="submit" class="text-green-600 hover:text-green-900">Approve</button>
+                                                </form>
+                                                <form method="post" action="{% url 'update_appointment_status' appointment.id %}" class="inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="declined">
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">Decline</button>
+                                                </form>
+                                            {% endif %}
+                                            {% if appointment.status == 'approved' %}
+                                                <a href="{% url 'reschedule_appointment' appointment.id %}" 
+                                                   class="text-indigo-600 hover:text-indigo-900">
+                                                    Reschedule
+                                                </a>
+                                                <a href="{% url 'start_guidance_session' appointment.id %}"
+                                                   class="text-green-600 hover:text-green-900">
+                                                    Start Session
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center">
+                    <div class="text-gray-500">
+                        {% if current_status %}
+                            No {{ current_status }} appointments found.
+                        {% else %}
+                            No appointments found.
+                        {% endif %}
+                    </div>
+                    {% if not is_counselor %}
+                    <a href="{% url 'schedule_session' %}" class="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                        Schedule Your First Appointment
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

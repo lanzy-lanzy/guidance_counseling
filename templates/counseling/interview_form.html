@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navigation %}{% endblock %}
+
+{% block content %}
+<!-- Include Sidebar -->
+{% include 'includes/sidebar.html' %}
+
+<!-- Main Content -->
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <!-- Form Header -->
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black opacity-10 pattern-dots"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between">
+                        <div class="w-24">
+                            <img src="{% static 'images/jhcsc_logo.png' %}" alt="JHCSC Logo" class="w-full">
+                        </div>
+                        <div class="text-center flex-1">
+                            <h4 class="text-lg font-semibold">J.H. CERILLES STATE COLLEGE</h4>
+                            <h5 class="text-md">DUMINGAG CAMPUS</h5>
+                            <p class="text-sm">Dumingag, Zamboanga del Sur, 7028</p>
+                            <p class="text-sm">Email: gco.dumingag@jhcsc.edu.ph</p>
+                            <h5 class="text-md mt-2">GUIDANCE & COUNSELING OFFICE</h5>
+                        </div>
+                        <div class="w-24">
+                            <img src="{% static 'images/counseling_logo.png' %}" alt="Guidance Logo" class="w-full">
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <span class="text-xs opacity-75">JHCSC-DUM-GCO-002/01July2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="p-6">
+                <div class="text-center mb-8">
+                    <h4 class="text-xl font-semibold text-gray-800">GUIDANCE COUNSELOR INTERVIEW FORM</h4>
+                    <p class="text-gray-600">(Student/Parent/Guardian)</p>
+                </div>
+
+                <form method="post" id="interviewForm" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Date -->
+                    <div class="flex justify-end">
+                        <div class="w-48">
+                            <label class="block text-sm font-medium text-gray-700">Date</label>
+                            <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="date" value="{% now 'Y-m-d' %}" {% if view_only %}readonly{% endif %}>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Basic Information</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Name of Student</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ student.user.get_full_name }}" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Course/Year</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ student.course }} - Year {{ student.year }}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Name of Parent/Guardian</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="parent_guardian_name" {% if view_only %}readonly{% endif %}>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Contact No.</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="contact_number" {% if view_only %}readonly{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interview Details -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Interview Details</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Interview</label>
+                                <div class="space-x-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" class="form-radio text-emerald-600" name="interview_reason" value="called_in" {% if view_only %}disabled{% endif %}>
+                                        <span class="ml-2">Called in</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" class="form-radio text-emerald-600" name="interview_reason" value="voluntary" {% if view_only %}disabled{% endif %}>
+                                        <span class="ml-2">Voluntary</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Referred by</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="referred_by" {% if view_only %}readonly{% endif %}>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="referrer_contact" {% if view_only %}readonly{% endif %}>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Time Started</label>
+                                <input type="time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="time_started" {% if view_only %}readonly{% endif %}>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Time Ended</label>
+                                <input type="time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="time_ended" {% if view_only %}readonly{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Problem Statement -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Problem Statement</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Problem Statement/Description</label>
+                            <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="problem_statement" rows="4" {% if view_only %}readonly{% endif %}></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Interview -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Interview Notes</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Interview</label>
+                            <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="interview_notes" rows="6" {% if view_only %}readonly{% endif %}></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Recommendation</h3>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Recommendation</label>
+                            <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="recommendation" rows="4" {% if view_only %}readonly{% endif %}></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Signatures -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Signatures</h3>
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Interviewed by:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ request.user.get_full_name }}" readonly>
+                                <div class="text-center mt-1">
+                                    <small class="text-gray-500">Guidance Counselor</small>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Conforme:</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="student_signature" {% if view_only %}readonly{% endif %}>
+                                <div class="text-center mt-1">
+                                    <small class="text-gray-500">Signature over Printed Name</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if not view_only %}
+                    <div class="flex justify-end space-x-3 print:hidden">
+                        <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" onclick="window.print()">
+                            <i class="fas fa-print mr-2"></i> Print
+                        </button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                            <i class="fas fa-save mr-2"></i> Save Form
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+        
+        .min-h-screen {
+            min-height: 100% !important;
+        }
+        
+        /* Adjust main content for A4 */
+        .max-w-4xl {
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Remove unnecessary spacing */
+        .py-8 {
+            padding: 0 !important;
+        }
+        
+        /* Ensure proper A4 size */
+        .bg-white {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            box-shadow: none;
+        }
+        
+        /* Maintain image sizes */
+        img {
+            max-width: 100% !important;
+        }
+        
+        /* Ensure form elements are visible */
+        input, textarea {
+            border: 1px solid #000 !important;
+            background-color: transparent !important;
+        }
+        
+        /* Maintain text colors */
+        * {
+            color: black !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        /* Preserve background colors and gradients */
+        .bg-gradient-to-r {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        
+        /* Ensure page breaks don't occur in the middle of sections */
+        .space-y-4, .space-y-6 {
+            page-break-inside: avoid;
+        }
+    }
+    
+    @media print {
+        body {
+            background: white !important;
+        }
+        .print\:hidden {
+            display: none !important;
+        }
+        input, textarea {
+            border: none !important;
+            padding: 0 !important;
+        }
+        textarea {
+            resize: none !important;
+            overflow: hidden !important;
+        }
+        .pattern-dots {
+            display: none !important;
+        }
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+    }
+    
+    .pattern-dots {
+        background-image: radial-gradient(currentColor 1px, transparent 1px);
+        background-size: calc(10 * 1px) calc(10 * 1px);
+    }
+</style>
+{% endblock %}
