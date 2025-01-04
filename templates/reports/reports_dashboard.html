@@ -1,270 +1,282 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Reports Dashboard - Guidance Counseling System{% endblock %}
 {% block navigation %}{% endblock %}
-
 {% block content %}
 <div class="flex h-screen bg-gray-50">
     {% include 'includes/sidebar.html' %}
 
     <div class="flex-1 flex flex-col ml-64">
         {% include 'includes/topbar.html' %}
-
         <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
-            <div class="max-w-7xl mx-auto">
-                <!-- Header Section -->
-                <div class="mb-8 text-center">
-                    <div class="flex justify-center mb-4">
-                        <div class="p-2 bg-indigo-100 rounded-full">
-                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+
+       
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Reports Dashboard</h1>
+                <p class="mt-2 text-sm text-gray-600">Generate and manage your reports efficiently</p>
+            </div>
+
+            <!-- Quick Statistics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Students -->
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-400 bg-opacity-30 rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </div>
-                    </div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Reports Dashboard</h1>
-                    <p class="text-gray-600 max-w-2xl mx-auto">Comprehensive analytics and reports for the guidance counseling system.</p>
-                </div>
-
-                <!-- Statistics Overview -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <!-- Total Students -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-blue-100 rounded-full p-3">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-lg font-semibold text-gray-900">{{ total_students }}</h2>
-                                <p class="text-sm text-gray-500">Total Students</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Total Sessions -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-green-100 rounded-full p-3">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-lg font-semibold text-gray-900">{{ total_sessions }}</h2>
-                                <p class="text-sm text-gray-500">Total Sessions</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Cases -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-yellow-100 rounded-full p-3">
-                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-lg font-semibold text-gray-900">{{ active_cases }}</h2>
-                                <p class="text-sm text-gray-500">Active Cases</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Completion Rate -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-purple-100 rounded-full p-3">
-                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h2 class="text-lg font-semibold text-gray-900">{{ completion_rate }}%</h2>
-                                <p class="text-sm text-gray-500">Completion Rate</p>
-                            </div>
+                        <div class="ml-4">
+                            <h2 class="text-xl font-semibold">{{ total_students }}</h2>
+                            <p class="text-sm opacity-90">Total Students</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Reports Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Session Types Distribution -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
-                            <h2 class="text-lg font-semibold text-gray-800">Session Types Distribution</h2>
+                <!-- Total Sessions -->
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-400 bg-opacity-30 rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
                         </div>
-                        <div class="p-6">
-                            <canvas id="sessionTypesChart" class="w-full" height="300"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Monthly Sessions Trend -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
-                            <h2 class="text-lg font-semibold text-gray-800">Monthly Sessions Trend</h2>
-                        </div>
-                        <div class="p-6">
-                            <canvas id="monthlyTrendChart" class="w-full" height="300"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Recent Sessions -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
-                            <h2 class="text-lg font-semibold text-gray-800">Recent Sessions</h2>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    {% for session in recent_sessions %}
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ session.student.user.get_full_name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ session.session_type }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ session.date }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                       {% if session.status == 'completed' %}bg-green-100 text-green-800
-                                                       {% elif session.status == 'scheduled' %}bg-blue-100 text-blue-800
-                                                       {% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                                {{ session.status|title }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Course Distribution -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
-                            <h2 class="text-lg font-semibold text-gray-800">Students by Course</h2>
-                        </div>
-                        <div class="p-6">
-                            <canvas id="courseDistributionChart" class="w-full" height="300"></canvas>
+                        <div class="ml-4">
+                            <h2 class="text-xl font-semibold">{{ total_sessions }}</h2>
+                            <p class="text-sm opacity-90">Total Sessions</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Export Options -->
-                <div class="mt-6 flex justify-end space-x-4">
-                    <a href="{% url 'export_report_pdf' %}" 
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                        <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                        </svg>
-                        Export as PDF
-                    </a>
-                    <a href="{% url 'export_report_excel' %}" 
-                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Export as Excel
-                    </a>
+                <!-- Active Cases -->
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-400 bg-opacity-30 rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h2 class="text-xl font-semibold">{{ active_cases }}</h2>
+                            <p class="text-sm opacity-90">Active Cases</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completion Rate -->
+                <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-red-400 bg-opacity-30 rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h2 class="text-xl font-semibold">{{ completion_rate }}%</h2>
+                            <p class="text-sm opacity-90">Completion Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Generate Report Section -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-indigo-500 to-indigo-600">
+                        <h2 class="text-xl font-semibold text-white">Generate New Report</h2>
+                    </div>
+                    <div class="p-6">
+                        <form action="{% url 'generate_report' %}" method="POST" class="space-y-6">
+                            {% csrf_token %}
+                            <!-- Report Type -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                                <select name="report_type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                                    <option value="student_summary">Student Summary Report</option>
+                                    <option value="session_analytics">Session Analytics Report</option>
+                                    <option value="counselor_performance">Counselor Performance Report</option>
+                                    <option value="case_management">Case Management Report</option>
+                                </select>
+                            </div>
+
+                            <!-- Date Range -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                                <select name="date_range" id="date_range" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md shadow-sm">
+                                    <option value="this_week">This Week</option>
+                                    <option value="this_month">This Month</option>
+                                    <option value="last_month">Last Month</option>
+                                    <option value="this_year">This Year</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+
+                            <!-- Custom Date Range (initially hidden) -->
+                            <div id="custom_date_range" class="hidden space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                    <input type="date" name="start_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                                    <input type="date" name="end_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+
+                            <!-- Format -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Format</label>
+                                <div class="mt-2 grid grid-cols-3 gap-3">
+                                    <label class="format-option flex items-center justify-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-50 cursor-pointer transition-all duration-200">
+                                        <input type="radio" name="format" value="pdf" class="hidden" checked>
+                                        <svg class="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        <span>PDF</span>
+                                    </label>
+                                    <label class="format-option flex items-center justify-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-50 cursor-pointer transition-all duration-200">
+                                        <input type="radio" name="format" value="excel" class="hidden">
+                                        <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span>Excel</span>
+                                    </label>
+                                    <label class="format-option flex items-center justify-center px-3 py-2 border rounded-md shadow-sm text-sm font-medium bg-white hover:bg-gray-50 cursor-pointer transition-all duration-200">
+                                        <input type="radio" name="format" value="csv" class="hidden">
+                                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span>CSV</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Generate Report
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Recent Reports -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="bg-indigo-500 px-6 py-4">
+                        <h2 class="text-xl font-semibold text-white">Recent Reports</h2>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        {% if recent_reports %}
+                            {% for report in recent_reports %}
+                            <div class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <!-- Report Icon -->
+                                    {% if report.format == 'pdf' %}
+                                        <div class="flex-shrink-0 w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    {% else %}
+                                        <div class="flex-shrink-0 w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Report Details -->
+                                    <div class="ml-4 flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 truncate">{{ report.name }}</div>
+                                        <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                            <span>{{ report.generated_at|date:"M d, Y" }}</span>
+                                            <span>•</span>
+                                            <span class="uppercase">{{ report.format }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center space-x-4 ml-4">
+                                        <a href="{% url 'view_report' report.id %}" 
+                                           class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View
+                                        </a>
+                                        {% if report.file %}
+                                        <a href="{{ report.file.url }}" 
+                                           class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                            </svg>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="p-6 text-center">
+                                <div class="mx-auto h-12 w-12 text-gray-400">
+                                    <svg class="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">No reports yet</h3>
+                                <p class="mt-1 text-sm text-gray-500">Get started by generating your first report.</p>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Session Types Distribution Chart
-    const sessionTypesCtx = document.getElementById('sessionTypesChart').getContext('2d');
-    new Chart(sessionTypesCtx, {
-        type: 'doughnut',
-        data: {
-            labels: {{ session_types_labels|safe }},
-            datasets: [{
-                data: {{ session_types_data }},
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(139, 92, 246, 0.8)'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
+    // Date range toggle
+    const dateRangeSelect = document.getElementById('date_range');
+    const customDateRange = document.getElementById('custom_date_range');
+
+    dateRangeSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customDateRange.classList.remove('hidden');
+        } else {
+            customDateRange.classList.add('hidden');
         }
     });
 
-    // Monthly Sessions Trend Chart
-    const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-    new Chart(monthlyTrendCtx, {
-        type: 'line',
-        data: {
-            labels: {{ monthly_labels|safe }},
-            datasets: [{
-                label: 'Sessions',
-                data: {{ monthly_data }},
-                borderColor: 'rgb(59, 130, 246)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
+    // Format selection enhancement
+    const formatOptions = document.querySelectorAll('.format-option');
+    
+    formatOptions.forEach(option => {
+        const radio = option.querySelector('input[type="radio"]');
+        
+        // Set initial state
+        if (radio.checked) {
+            option.classList.add('ring-2', 'ring-indigo-500', 'border-indigo-500', 'bg-indigo-50');
         }
-    });
-
-    // Course Distribution Chart
-    const courseDistributionCtx = document.getElementById('courseDistributionChart').getContext('2d');
-    new Chart(courseDistributionCtx, {
-        type: 'bar',
-        data: {
-            labels: {{ course_labels|safe }},
-            datasets: [{
-                label: 'Students',
-                data: {{ course_data }},
-                backgroundColor: 'rgba(59, 130, 246, 0.8)'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
-        }
+        
+        option.addEventListener('click', function() {
+            // Remove active state from all options
+            formatOptions.forEach(opt => {
+                opt.classList.remove('ring-2', 'ring-indigo-500', 'border-indigo-500', 'bg-indigo-50');
+            });
+            
+            // Add active state to clicked option
+            this.classList.add('ring-2', 'ring-indigo-500', 'border-indigo-500', 'bg-indigo-50');
+            
+            // Check the radio input
+            radio.checked = true;
+        });
     });
 });
 </script>
+{% endblock %}
 {% endblock %}

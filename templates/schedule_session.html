@@ -5,7 +5,7 @@
 {% block navigation %}{% endblock %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-50">
+<div class="flex h-screen bg-emerald-50">
     <!-- Include Sidebar -->
     {% include 'includes/sidebar.html' %}
 
@@ -14,13 +14,13 @@
         <!-- Top Navigation -->
         {% include 'includes/topbar.html' %}    
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <main class="flex-1 overflow-y-auto p-6 bg-emerald-50">
             <div class="max-w-3xl mx-auto">
                 <!-- Header Section -->
                 <div class="mb-8 text-center">
                     <div class="flex justify-center mb-4">
-                        <div class="p-2 bg-indigo-100 rounded-full">
-                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-3 bg-emerald-100 rounded-full shadow-md">
+                            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                         </div>
@@ -30,9 +30,9 @@
                 </div>
 
                 <!-- Form Card -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-white rounded-xl shadow-lg border border-emerald-100 overflow-hidden">
                     <!-- Form Header -->
-                    <div class="px-8 py-6 bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
+                    <div class="px-8 py-6 bg-gradient-to-r from-emerald-50 to-emerald-100 border-b border-emerald-200">
                         <h2 class="text-xl font-semibold text-gray-800">Session Details</h2>
                         <p class="text-sm text-gray-600 mt-1">Please fill in the details below to schedule your session</p>
                     </div>
@@ -69,7 +69,7 @@
                             <!-- Submit Button -->
                             <div class="pt-6">
                                 <button type="submit"
-                                    class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                                    class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-md text-base font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 transform hover:scale-[1.02]">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
@@ -82,7 +82,7 @@
 
                 <!-- Help Text -->
                 <div class="mt-6 text-center text-sm text-gray-500">
-                    Need help? Contact the guidance office at <a href="mailto:guidance@school.edu" class="text-indigo-600 hover:text-indigo-500">guidance@school.edu</a>
+                    Need help? Contact the guidance office at <a href="mailto:guidance@school.edu" class="text-emerald-600 hover:text-emerald-500 transition-colors duration-200">guidance@school.edu</a>
                 </div>
             </div>
         </main>

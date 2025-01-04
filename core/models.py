@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.conf import settings
+import os
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -212,3 +214,39 @@ class Interview(models.Model):
     
     def __str__(self):
         return f"Interview Form - {self.student.user.username} - {self.date}"
+
+class Report(models.Model):
+    REPORT_TYPES = [
+        ('student_summary', 'Student Summary Report'),
+        ('session_analytics', 'Session Analytics Report'),
+        ('counselor_performance', 'Counselor Performance Report'),
+        ('case_management', 'Case Management Report'),
+    ]
+
+    FORMAT_CHOICES = [
+        ('pdf', 'PDF'),
+        ('excel', 'Excel'),
+        ('csv', 'CSV'),
+    ]
+
+    name = models.CharField(max_length=255)
+    report_type = models.CharField(max_length=50, choices=REPORT_TYPES)
+    format = models.CharField(max_length=10, choices=FORMAT_CHOICES)
+    file = models.FileField(upload_to='reports/')
+    generated_at = models.DateTimeField(auto_now_add=True)
+    generated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-generated_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.get_report_type_display()}"
+
+    def delete(self, *args, **kwargs):
+        # Delete the file when the model instance is deleted
+        if self.file:
+            if os.path.isfile(self.file.path):
+                os.remove(self.file.path)
+        super().delete(*args, **kwargs)

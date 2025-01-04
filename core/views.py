@@ -6,8 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, UpdateView, TemplateView
 from django.urls import reverse
+from django.conf import settings
 from .forms import UserRegistrationForm, AppointmentForm, InterviewForm
-from .models import Student, Counselor, Appointment, GuidanceSession, FollowUp, Interview
+from .models import Student, Counselor, Appointment, GuidanceSession, FollowUp, Interview, Report
 from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import json
@@ -19,9 +20,10 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph
+import os
+import csv
 
 def home(request):
     if request.user.is_authenticated:
@@ -171,6 +173,7 @@ def dashboard(request):
             return redirect('login')
 
     return render(request, 'dashboard.html', context)
+
 @login_required
 def schedule_session(request):
     if request.user.role != 'Student':
@@ -639,6 +642,9 @@ class ReportsDashboardView(LoginRequiredMixin, TemplateView):
         total_sessions = context['total_sessions']
         context['completion_rate'] = round((completed_sessions / total_sessions * 100) if total_sessions > 0 else 0)
 
+        # Get recent reports
+        context['recent_reports'] = Report.objects.all().order_by('-generated_at')[:5]
+
         # Session types distribution
         session_types = GuidanceSession.objects.values('session_type').annotate(count=Count('id'))
         context['session_types_labels'] = json.dumps([st['session_type'] for st in session_types])
@@ -749,3 +755,390 @@ def export_report_pdf(request):
     # Build PDF
     doc.build(elements)
     return response
+
+@login_required
+def generate_report(request):
+    if request.method == 'POST':
+        report_type = request.POST.get('report_type')
+        date_range = request.POST.get('date_range')
+        format_type = request.POST.get('format')
+
+        # Handle custom date range
+        start_date = None
+        end_date = None
+        if date_range == 'custom':
+            start_date = request.POST.get('start_date')
+            end_date = request.POST.get('end_date')
+            if not start_date or not end_date:
+                messages.error(request, 'Please provide both start and end dates for custom range.')
+                return redirect('reports_dashboard')
+
+        else:
+            # Calculate date range based on selection
+            end_date = timezone.now().date()
+            if date_range == 'this_week':
+                start_date = end_date - timedelta(days=7)
+            elif date_range == 'this_month':
+                start_date = end_date.replace(day=1)
+            elif date_range == 'last_month':
+                last_month = end_date.replace(day=1) - timedelta(days=1)
+                start_date = last_month.replace(day=1)
+                end_date = last_month
+            elif date_range == 'this_year':
+                start_date = end_date.replace(month=1, day=1)
+
+        # Generate report name
+        report_name = f"{report_type}_{date_range}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
+
+        try:
+            # Create report object
+            report = Report.objects.create(
+                name=report_name,
+                report_type=report_type,
+                format=format_type,
+                generated_by=request.user,
+                start_date=start_date,
+                end_date=end_date
+            )
+
+            # Generate report based on type
+            if format_type == 'pdf':
+                file_path = generate_pdf_report(report_type, start_date, end_date)
+            elif format_type == 'excel':
+                file_path = generate_excel_report(report_type, start_date, end_date)
+            else:  # CSV
+                file_path = generate_csv_report(report_type, start_date, end_date)
+
+            # Save the generated file to the report object
+            with open(file_path, 'rb') as f:
+                report.file.save(f"{report_name}.{format_type}", f)
+
+            messages.success(request, 'Report generated successfully.')
+            return redirect('view_report', report_id=report.id)
+
+        except Exception as e:
+            messages.error(request, f'Error generating report: {str(e)}')
+            return redirect('reports_dashboard')
+
+    return redirect('reports_dashboard')
+
+@login_required
+def view_report(request, report_id):
+    try:
+        report = Report.objects.get(id=report_id)
+        context = {
+            'report': report,
+            'download_url': report.file.url if report.file else None,
+        }
+        return render(request, 'reports/view_report.html', context)
+    except Report.DoesNotExist:
+        messages.error(request, 'Report not found.')
+        return redirect('reports_dashboard')
+
+def generate_pdf_report(report_type, start_date, end_date):
+    # Create a temporary file path
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file = os.path.join(temp_dir, f'report_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf')
+
+    # Create PDF document
+    doc = SimpleDocTemplate(temp_file, pagesize=letter)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # Add title
+    title = Paragraph(f"Guidance Counseling Report - {report_type}", styles['Title'])
+    elements.append(title)
+    elements.append(Spacer(1, 20))
+
+    # Add date range
+    date_range_text = f"Period: {start_date.strftime('%B %d, %Y')} - {end_date.strftime('%B %d, %Y')}"
+    date_range = Paragraph(date_range_text, styles['Normal'])
+    elements.append(date_range)
+    elements.append(Spacer(1, 20))
+
+    # Generate report data based on type
+    if report_type == 'student_summary':
+        data = [['Student Name', 'Course', 'Year', 'Total Sessions', 'Status']]
+        students = Student.objects.all()
+        for student in students:
+            sessions = GuidanceSession.objects.filter(
+                student=student,
+                date__range=[start_date, end_date]
+            ).count()
+            data.append([
+                f"{student.user.get_full_name()}",
+                student.course,
+                student.year,
+                sessions,
+                'Active' if sessions > 0 else 'Inactive'
+            ])
+
+    elif report_type == 'session_analytics':
+        data = [['Date', 'Total Sessions', 'Completed', 'Ongoing']]
+        sessions = GuidanceSession.objects.filter(date__range=[start_date, end_date])
+        dates = sessions.dates('date', 'day')
+        for date in dates:
+            day_sessions = sessions.filter(date=date)
+            data.append([
+                date.strftime('%Y-%m-%d'),
+                day_sessions.count(),
+                day_sessions.filter(status='completed').count(),
+                day_sessions.filter(status='ongoing').count()
+            ])
+
+    elif report_type == 'counselor_performance':
+        data = [['Counselor Name', 'Total Sessions', 'Completed', 'Success Rate']]
+        counselors = Counselor.objects.all()
+        for counselor in counselors:
+            sessions = GuidanceSession.objects.filter(
+                counselor=counselor,
+                date__range=[start_date, end_date]
+            )
+            total = sessions.count()
+            completed = sessions.filter(status='completed').count()
+            success_rate = (completed / total * 100) if total > 0 else 0
+            data.append([
+                counselor.user.get_full_name(),
+                total,
+                completed,
+                f"{success_rate:.1f}%"
+            ])
+
+    else:  # case_management
+        data = [['Case ID', 'Student', 'Status', 'Sessions', 'Last Updated']]
+        sessions = GuidanceSession.objects.filter(
+            date__range=[start_date, end_date]
+        ).order_by('student')
+        
+        for session in sessions:
+            data.append([
+                f"CASE-{session.id}",
+                session.student.user.get_full_name(),
+                session.status.title(),
+                session.followup_set.count(),
+                session.updated_at.strftime('%Y-%m-%d')
+            ])
+
+    # Create table
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(table)
+
+    # Build PDF
+    doc.build(elements)
+    return temp_file
+
+def generate_excel_report(report_type, start_date, end_date):
+    # Create a temporary file path
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file = os.path.join(temp_dir, f'report_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx')
+
+    # Create workbook and worksheet
+    workbook = xlsxwriter.Workbook(temp_file)
+    worksheet = workbook.add_worksheet()
+
+    # Add formats
+    header_format = workbook.add_format({
+        'bold': True,
+        'bg_color': '#4B5563',
+        'font_color': 'white',
+        'align': 'center',
+        'valign': 'vcenter',
+        'border': 1
+    })
+    cell_format = workbook.add_format({
+        'align': 'center',
+        'valign': 'vcenter',
+        'border': 1
+    })
+
+    # Write title
+    worksheet.merge_range('A1:E1', f'Guidance Counseling Report - {report_type}', header_format)
+    worksheet.merge_range('A2:E2', f'Period: {start_date.strftime("%B %d, %Y")} - {end_date.strftime("%B %d, %Y")}', cell_format)
+
+    # Generate report data based on type
+    if report_type == 'student_summary':
+        headers = ['Student Name', 'Course', 'Year', 'Total Sessions', 'Status']
+        row = 3
+        for col, header in enumerate(headers):
+            worksheet.write(row, col, header, header_format)
+
+        students = Student.objects.all()
+        for student in students:
+            row += 1
+            sessions = GuidanceSession.objects.filter(
+                student=student,
+                date__range=[start_date, end_date]
+            ).count()
+            data = [
+                student.user.get_full_name(),
+                student.course,
+                student.year,
+                sessions,
+                'Active' if sessions > 0 else 'Inactive'
+            ]
+            for col, value in enumerate(data):
+                worksheet.write(row, col, value, cell_format)
+
+    elif report_type == 'session_analytics':
+        headers = ['Date', 'Total Sessions', 'Completed', 'Ongoing']
+        row = 3
+        for col, header in enumerate(headers):
+            worksheet.write(row, col, header, header_format)
+
+        sessions = GuidanceSession.objects.filter(date__range=[start_date, end_date])
+        dates = sessions.dates('date', 'day')
+        for date in dates:
+            row += 1
+            day_sessions = sessions.filter(date=date)
+            data = [
+                date.strftime('%Y-%m-%d'),
+                day_sessions.count(),
+                day_sessions.filter(status='completed').count(),
+                day_sessions.filter(status='ongoing').count()
+            ]
+            for col, value in enumerate(data):
+                worksheet.write(row, col, value, cell_format)
+
+    elif report_type == 'counselor_performance':
+        headers = ['Counselor Name', 'Total Sessions', 'Completed', 'Success Rate']
+        row = 3
+        for col, header in enumerate(headers):
+            worksheet.write(row, col, header, header_format)
+
+        counselors = Counselor.objects.all()
+        for counselor in counselors:
+            row += 1
+            sessions = GuidanceSession.objects.filter(
+                counselor=counselor,
+                date__range=[start_date, end_date]
+            )
+            total = sessions.count()
+            completed = sessions.filter(status='completed').count()
+            success_rate = (completed / total * 100) if total > 0 else 0
+            data = [
+                counselor.user.get_full_name(),
+                total,
+                completed,
+                f"{success_rate:.1f}%"
+            ]
+            for col, value in enumerate(data):
+                worksheet.write(row, col, value, cell_format)
+
+    else:  # case_management
+        headers = ['Case ID', 'Student', 'Status', 'Sessions', 'Last Updated']
+        row = 3
+        for col, header in enumerate(headers):
+            worksheet.write(row, col, header, header_format)
+
+        sessions = GuidanceSession.objects.filter(
+            date__range=[start_date, end_date]
+        ).order_by('student')
+        
+        for session in sessions:
+            row += 1
+            data = [
+                f"CASE-{session.id}",
+                session.student.user.get_full_name(),
+                session.status.title(),
+                session.followup_set.count(),
+                session.updated_at.strftime('%Y-%m-%d')
+            ]
+            for col, value in enumerate(data):
+                worksheet.write(row, col, value, cell_format)
+
+    # Auto-adjust column widths
+    for col in range(len(headers)):
+        worksheet.set_column(col, col, 15)
+
+    workbook.close()
+    return temp_file
+
+def generate_csv_report(report_type, start_date, end_date):
+    # Create a temporary file path
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file = os.path.join(temp_dir, f'report_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv')
+
+    with open(temp_file, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        
+        # Write headers based on report type
+        if report_type == 'student_summary':
+            writer.writerow(['Student Name', 'Course', 'Year', 'Total Sessions', 'Status'])
+            students = Student.objects.all()
+            for student in students:
+                sessions = GuidanceSession.objects.filter(
+                    student=student,
+                    date__range=[start_date, end_date]
+                ).count()
+                writer.writerow([
+                    student.user.get_full_name(),
+                    student.course,
+                    student.year,
+                    sessions,
+                    'Active' if sessions > 0 else 'Inactive'
+                ])
+
+        elif report_type == 'session_analytics':
+            writer.writerow(['Date', 'Total Sessions', 'Completed', 'Ongoing'])
+            sessions = GuidanceSession.objects.filter(date__range=[start_date, end_date])
+            dates = sessions.dates('date', 'day')
+            for date in dates:
+                day_sessions = sessions.filter(date=date)
+                writer.writerow([
+                    date.strftime('%Y-%m-%d'),
+                    day_sessions.count(),
+                    day_sessions.filter(status='completed').count(),
+                    day_sessions.filter(status='ongoing').count()
+                ])
+
+        elif report_type == 'counselor_performance':
+            writer.writerow(['Counselor Name', 'Total Sessions', 'Completed', 'Success Rate'])
+            counselors = Counselor.objects.all()
+            for counselor in counselors:
+                sessions = GuidanceSession.objects.filter(
+                    counselor=counselor,
+                    date__range=[start_date, end_date]
+                )
+                total = sessions.count()
+                completed = sessions.filter(status='completed').count()
+                success_rate = (completed / total * 100) if total > 0 else 0
+                writer.writerow([
+                    counselor.user.get_full_name(),
+                    total,
+                    completed,
+                    f"{success_rate:.1f}%"
+                ])
+
+        else:  # case_management
+            writer.writerow(['Case ID', 'Student', 'Status', 'Sessions', 'Last Updated'])
+            sessions = GuidanceSession.objects.filter(
+                date__range=[start_date, end_date]
+            ).order_by('student')
+            
+            for session in sessions:
+                writer.writerow([
+                    f"CASE-{session.id}",
+                    session.student.user.get_full_name(),
+                    session.status.title(),
+                    session.followup_set.count(),
+                    session.updated_at.strftime('%Y-%m-%d')
+                ])
+
+    return temp_file

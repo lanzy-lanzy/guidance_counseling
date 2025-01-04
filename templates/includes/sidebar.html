@@ -9,7 +9,7 @@
         <!-- Header with gradient -->
         <div class="flex items-center justify-center h-16 bg-gradient-to-r from-emerald-600 to-emerald-800 relative">
             <div class="absolute inset-0 bg-black/10"></div>
-            <h1 class="text-xl font-bold relative z-10">GuidancePro</h1>
+            <h1 class="text-xl font-bold relative z-10">Guidance Counseling</h1>
         </div>
         
         <nav class="mt-5">
@@ -43,13 +43,7 @@
                 Counselor Tools
             </div>
             
-            <a href="{% url 'reports_dashboard' %}" 
-               class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'reports_dashboard' %}bg-black/20{% endif %}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Reports
-            </a>
+       
             
             <!-- Appointments Dropdown -->
             <div class="relative" x-data="{ open: false }">
@@ -112,6 +106,14 @@
                 </svg>
                 Session History
             </a>
+
+            <a href="{% url 'reports_dashboard' %}" 
+            class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'reports_dashboard' %}bg-black/20{% endif %}">
+             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+             </svg>
+             Reports
+         </a>
             {% else %}
             <!-- Student Navigation -->
             <div class="px-4 py-2 mt-4 text-xs uppercase text-emerald-300">

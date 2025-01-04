@@ -12,7 +12,7 @@
 {% block navigation %}{% endblock %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-100">
+<div class="flex h-screen bg-emerald-50">
     <!-- Include Sidebar -->
     {% include 'includes/sidebar.html' %}
 
@@ -22,11 +22,14 @@
         {% include 'includes/topbar.html' %}
         
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+        <main class="flex-1 overflow-y-auto p-6 bg-emerald-50">
             <div class="container mx-auto">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h1 class="text-2xl font-semibold text-gray-800">
+                        <h1 class="text-2xl font-semibold text-gray-800 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
                             {% if current_status %}
                                 {{ current_status|title }} Appointments
                             {% else %}
@@ -34,13 +37,19 @@
                             {% endif %}
                         </h1>
                         {% if current_status %}
-                        <a href="{% url 'appointment_list' %}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                        <a href="{% url 'appointment_list' %}" class="text-sm text-emerald-600 hover:text-emerald-800 flex items-center mt-1">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
                             View all appointments
                         </a>
                         {% endif %}
                     </div>
                     {% if not is_counselor %}
-                    <a href="{% url 'schedule_session' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                    <a href="{% url 'schedule_session' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 flex items-center transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
                         Schedule New Appointment
                     </a>
                     {% endif %}
@@ -49,7 +58,16 @@
                 {% if messages %}
                 <div class="mb-4">
                     {% for message in messages %}
-                    <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} rounded-md">
+                    <div class="p-4 flex items-center {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} rounded-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {% if message.tags == 'success' %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            {% elif message.tags == 'error' %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            {% else %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            {% endif %}
+                        </svg>
                         {{ message }}
                     </div>
                     {% endfor %}
@@ -57,19 +75,47 @@
                 {% endif %}
                 
                 {% if appointments %}
-                <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-emerald-50">
                             <tr>
                                 {% if is_counselor %}
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
                                 {% else %}
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Counselor</th>
                                 {% endif %}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        Date
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Time
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                        </svg>
+                                        Purpose
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Status
+                                    </div>
+                                </th>
                                 {% if is_counselor %}
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 {% endif %}
@@ -77,12 +123,18 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for appointment in appointments %}
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-emerald-50 transition-colors duration-150">
                                 {% if is_counselor %}
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             {% if appointment.student.user.profile_picture %}
                                                 <img class="h-8 w-8 rounded-full mr-3" src="{{ appointment.student.user.profile_picture.url }}" alt="">
+                                            {% else %}
+                                                <div class="h-8 w-8 rounded-full mr-3 bg-emerald-100 flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                    </svg>
+                                                </div>
                                             {% endif %}
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">{{ appointment.student.user.get_full_name|default:appointment.student.user.username }}</div>
@@ -95,6 +147,12 @@
                                         <div class="flex items-center">
                                             {% if appointment.counselor.user.profile_picture %}
                                                 <img class="h-8 w-8 rounded-full mr-3" src="{{ appointment.counselor.user.profile_picture.url }}" alt="">
+                                            {% else %}
+                                                <div class="h-8 w-8 rounded-full mr-3 bg-emerald-100 flex items-center justify-center">
+                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                    </svg>
+                                                </div>
                                             {% endif %}
                                             <div class="text-sm font-medium text-gray-900">{{ appointment.counselor.user.get_full_name|default:appointment.counselor.user.username }}</div>
                                         </div>
@@ -110,7 +168,7 @@
                                     <div class="max-w-xs truncate">{{ appointment.purpose }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    <span class="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full 
                                         {% if appointment.status == 'approved' %}
                                             bg-green-100 text-green-800
                                         {% elif appointment.status == 'declined' %}
@@ -118,31 +176,57 @@
                                         {% else %}
                                             bg-yellow-100 text-yellow-800
                                         {% endif %}">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {% if appointment.status == 'approved' %}
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            {% elif appointment.status == 'declined' %}
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            {% else %}
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            {% endif %}
+                                        </svg>
                                         {{ appointment.status|title }}
                                     </span>
                                 </td>
                                 {% if is_counselor %}
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
+                                        <div class="flex space-x-3">
                                             {% if appointment.status == 'pending' %}
                                                 <form method="post" action="{% url 'update_appointment_status' appointment.id %}" class="inline">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="status" value="approved">
-                                                    <button type="submit" class="text-green-600 hover:text-green-900">Approve</button>
+                                                    <button type="submit" class="text-green-600 hover:text-green-900 flex items-center">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        Approve
+                                                    </button>
                                                 </form>
                                                 <form method="post" action="{% url 'update_appointment_status' appointment.id %}" class="inline">
                                                     {% csrf_token %}
                                                     <input type="hidden" name="status" value="declined">
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Decline</button>
+                                                    <button type="submit" class="text-red-600 hover:text-red-900 flex items-center">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                        Decline
+                                                    </button>
                                                 </form>
                                             {% endif %}
                                             {% if appointment.status == 'approved' %}
                                                 <a href="{% url 'reschedule_appointment' appointment.id %}" 
-                                                   class="text-indigo-600 hover:text-indigo-900">
+                                                   class="text-emerald-600 hover:text-emerald-900 flex items-center">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                    </svg>
                                                     Reschedule
                                                 </a>
                                                 <a href="{% url 'start_guidance_session' appointment.id %}"
-                                                   class="text-green-600 hover:text-green-900">
+                                                   class="text-emerald-600 hover:text-emerald-900 flex items-center">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
                                                     Start Session
                                                 </a>
                                             {% endif %}
@@ -155,19 +239,25 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="bg-white rounded-lg shadow-sm p-6 text-center">
-                    <div class="text-gray-500">
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+                    <div class="flex flex-col items-center text-gray-500">
+                        <svg class="w-16 h-16 text-emerald-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
                         {% if current_status %}
                             No {{ current_status }} appointments found.
                         {% else %}
                             No appointments found.
                         {% endif %}
+                        {% if not is_counselor %}
+                        <a href="{% url 'schedule_session' %}" class="mt-4 inline-block bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Schedule Your First Appointment
+                        </a>
+                        {% endif %}
                     </div>
-                    {% if not is_counselor %}
-                    <a href="{% url 'schedule_session' %}" class="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-                        Schedule Your First Appointment
-                    </a>
-                    {% endif %}
                 </div>
                 {% endif %}
             </div>
