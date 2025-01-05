@@ -7,8 +7,9 @@ import os
 
 class User(AbstractUser):
     ROLE_CHOICES = [
-        ('Counselor', 'Counselor'),
-        ('Student', 'Student'),
+        ('admin', 'Admin'),
+        ('counselor', 'Counselor'),
+        ('student', 'Student'),
     ]
 
     APPROVAL_STATUS_CHOICES = [

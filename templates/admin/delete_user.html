@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete User{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-50">
+        {% include 'includes/admin_sidebar.html' %}
+
+    <!-- Main Content Area -->
+        <div class="flex-1 ml-64 p-8 overflow-y-auto">
+            <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-gray-900">Delete User</h1>
+                    <p class="text-sm text-gray-600">Confirm user deletion</p>
+                </div>
+
+            <!-- Confirmation Card -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="text-center">
+                        <svg class="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">Delete User Account</h3>
+
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">
+                                Are you sure you want to delete the user account for <strong>{{ user.get_full_name }}</strong>?
+                                This action cannot be undone. All data associated with this account will be permanently removed.
+                            </p>
+                        </div>
+
+                    <!-- User Info -->
+                        <div class="mt-4 bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center justify-center mb-4">
+                                {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="h-16 w-16 rounded-full">
+                                {% else %}
+                                    <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <span class="text-2xl text-gray-500 font-medium">{{ user.first_name|first|upper }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <dl class="space-y-1 text-sm text-gray-700">
+                                <div>
+                                    <dt class="inline font-medium">Email:</dt>
+                                    <dd class="inline ml-1">{{ user.email }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="inline font-medium">Role:</dt>
+                                    <dd class="inline ml-1">{{ user.role|title }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="inline font-medium">Joined:</dt>
+                                    <dd class="inline ml-1">{{ user.date_joined|date:"M d, Y" }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                    <!-- Action Buttons -->
+                        <div class="mt-6 flex justify-center space-x-4">
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    Delete User
+                                </button>
+                            </form>
+                            <a href="{% url 'admin_users' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

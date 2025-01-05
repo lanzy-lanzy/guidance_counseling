@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Students - Counselor Dashboard{% endblock %}
+{% block navigation %}{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-50">
+        {% include 'includes/counselor_sidebar.html' %}
+
+    <!-- Main Content Area -->
+        <div class="flex-1 ml-64">
+        <!-- Top Navigation -->
+            <nav class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex items-center">
+                            <h2 class="text-xl font-semibold text-gray-800">Student Management</h2>
+                        </div>
+                        <div class="ml-6 flex items-center">
+                            <span class="text-sm text-gray-500 mr-4">Last login: {{ request.user.last_login|date:"F j, Y, P" }}</span>
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" class="flex items-center max-w-xs bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" id="user-menu-button">
+                                    <span class="sr-only">Open user menu</span>
+                                    {% if request.user.profile_picture %}
+                                        <img class="h-8 w-8 rounded-full object-cover" src="{{ request.user.profile_picture.url }}" alt="Profile">
+                                    {% else %}
+                                        <div class="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-emerald-600">
+                                                {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </button>
+                                <div x-show="open"
+                                     @click.away="open = false"
+                                     class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                                     role="menu">
+                                    <div class="py-1" role="none">
+                                        <a href="{% url 'counselor_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Dashboard</a>
+                                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Logout</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+        <!-- Main Content -->
+            <div class="p-8">
+            <!-- Header Section -->
+                <div class="mb-8">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="md:flex md:items-center md:justify-between">
+                            <div class="flex-1 min-w-0">
+                                <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Student Directory</h1>
+                                <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                                        <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                        Total Students: {{ students|length }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Filters and Search Section -->
+                <div class="mb-8 bg-white rounded-lg shadow p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Search -->
+                        <div class="relative">
+                            <input type="text" id="search" placeholder="Search students..."
+                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                    <!-- Year Filter -->
+                        <div>
+                            <select id="yearFilter" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">All Years</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+                    <!-- Course Filter -->
+                        <div>
+                            <select id="courseFilter" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">All Courses</option>
+                                {% for course in courses %}
+                                    <option value="{{ course }}">{{ course }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    <!-- Status Filter -->
+                        <div>
+                            <select id="statusFilter" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Students Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for student in students %}
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 student-card"
+                             data-year="{{ student.year }}"
+                             data-status="{{ student.user.approval_status }}"
+                             data-course="{{ student.course }}">
+                            <div class="p-6">
+                        <!-- Student Header -->
+                                <div class="flex items-center space-x-4">
+                                    {% if student.user.profile_picture %}
+                                        <img src="{{ student.user.profile_picture.url }}" alt="Profile picture"
+                                             class="h-16 w-16 rounded-full object-cover">
+                                    {% else %}
+                                        <div class="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center">
+                                            <span class="text-2xl font-medium text-emerald-600">
+                                                {{ student.user.first_name|first }}{{ student.user.last_name|first }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900 student-name">{{ student.user.get_full_name }}</h3>
+                                        <p class="text-sm text-gray-500">{{ student.user.email }}</p>
+                                    </div>
+                                </div>
+
+                        <!-- Student Details -->
+                                <div class="mt-4 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Course</p>
+                                        <p class="text-sm text-gray-900">{{ student.course }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Year</p>
+                                        <p class="text-sm text-gray-900">{{ student.year }}{% if student.year == 1 %}st{% elif student.year == 2 %}nd{% elif student.year == 3 %}rd{% else %}th{% endif %} Year</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Contact</p>
+                                        <p class="text-sm text-gray-900">{{ student.contact_number|default:"Not provided" }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Status</p>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                     {% if student.user.approval_status == 'approved' %}bg-emerald-100 text-emerald-800
+                                                     {% elif student.user.approval_status == 'rejected' %}bg-red-100 text-red-800
+                                                     {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                            {{ student.user.approval_status|title }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                        <!-- Quick Stats -->
+                                <div class="mt-4 grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                                    <div>
+                                        <p class="text-xs font-medium text-gray-500">Sessions</p>
+                                        <p class="text-sm font-semibold text-gray-900">{{ student.sessions.count }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium text-gray-500">Last Session</p>
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            {% with last_session=student.sessions.last %}
+                                                {% if last_session %}
+                                                    {{ last_session.date|date:"M d, Y" }}
+                                                {% else %}
+                                                    None
+                                                {% endif %}
+                                            {% endwith %}
+                                        </p>
+                                    </div>
+                                </div>
+
+                        <!-- Action Buttons -->
+                                <div class="mt-6 flex flex-col space-y-2">
+                                    <div class="flex space-x-2">
+                                        <a href="{% url 'student_profile' student.id %}"
+                                           class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                            <svg class="mr-2 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>
+                                            View Profile
+                                        </a>
+                                        <a href="{% url 'create_interview' student.id %}"
+                                           class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            </svg>
+                                            Create Interview
+                                        </a>
+                                    </div>
+                                    {% if student.user.approval_status == 'pending' %}
+                                        <div class="flex space-x-2">
+                                            <form method="POST" action="{% url 'admin_approve_user' student.user.id %}" class="flex-1">
+                                                {% csrf_token %}
+                                                <button type="submit" class="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    Approve
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{% url 'admin_reject_user' student.user.id %}" class="flex-1">
+                                                {% csrf_token %}
+                                                <button type="submit" class="w-full inline-flex items-center justify-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                    Reject
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-span-3 text-center py-12">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No students found</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by adding new students to the system.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block extra_js %}
+        <script>
+    // Search and filter functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('search');
+                const yearFilter = document.getElementById('yearFilter');
+                const courseFilter = document.getElementById('courseFilter');
+                const statusFilter = document.getElementById('statusFilter');
+                const studentCards = document.querySelectorAll('.student-card');
+
+                function filterStudents() {
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedYear = yearFilter.value;
+                    const selectedCourse = courseFilter.value;
+                    const selectedStatus = statusFilter.value;
+
+                    studentCards.forEach(card => {
+                        const studentName = card.querySelector('.student-name').textContent.toLowerCase();
+                        const studentYear = card.dataset.year;
+                        const studentCourse = card.dataset.course;
+                        const studentStatus = card.dataset.status;
+
+                        const matchesSearch = studentName.includes(searchTerm);
+                        const matchesYear = !selectedYear || studentYear === selectedYear;
+                        const matchesCourse = !selectedCourse || studentCourse === selectedCourse;
+                        const matchesStatus = !selectedStatus || studentStatus === selectedStatus;
+
+                        if (matchesSearch && matchesYear && matchesCourse && matchesStatus) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                }
+
+                searchInput.addEventListener('input', filterStudents);
+                yearFilter.addEventListener('change', filterStudents);
+                courseFilter.addEventListener('change', filterStudents);
+                statusFilter.addEventListener('change', filterStudents);
+            });
+        </script>
+    {% endblock %}
+{% endblock %}

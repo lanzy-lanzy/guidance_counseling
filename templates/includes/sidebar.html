@@ -11,7 +11,7 @@
             <div class="absolute inset-0 bg-black/10"></div>
             <h1 class="text-xl font-bold relative z-10">Guidance Counseling</h1>
         </div>
-        
+
         <nav class="mt-5">
             <div class="px-4 py-2 text-sm text-emerald-50">
                 {% if user.is_authenticated %}
@@ -29,7 +29,7 @@
             </div>
 
             <!-- Common Navigation -->
-            <a href="{% url 'dashboard' %}" 
+            <a href="{% url 'dashboard' %}"
                class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/dashboard/' %}bg-black/20{% endif %}">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -39,100 +39,99 @@
 
             {% if user.is_staff %}
             <!-- Counselor Navigation -->
-            <div class="px-4 py-2 mt-4 text-xs uppercase text-emerald-300">
-                Counselor Tools
-            </div>
-            
-       
-            
+                <div class="px-4 py-2 mt-4 text-xs uppercase text-emerald-300">
+                    Counselor Tools
+                </div>
+                      <!-- Logout Link -->
+
             <!-- Appointments Dropdown -->
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" 
-                        class="w-full flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if '/appointments/' in request.path %}bg-black/20{% endif %}">
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open"
+                            class="w-full flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if '/appointments/' in request.path %}bg-black/20{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Appointments</span>
+                        <svg class="w-4 h-4 ml-auto transform transition-transform duration-200"
+                             :class="{'rotate-180': open}"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         class="relative left-0 w-full mt-1">
+                        <div class="bg-emerald-800/50 backdrop-blur-sm py-1">
+                            <a href="{% url 'appointment_list' %}"
+                               class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/appointments/' and not request.GET.status %}bg-black/20{% endif %}">
+                                All Appointments
+                            </a>
+                            <a href="{% url 'appointment_list' %}?status=pending"
+                               class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.GET.status == 'pending' %}bg-black/20{% endif %}">
+                                Pending Appointments
+                            </a>
+                            <a href="{% url 'appointment_list' %}?status=approved"
+                               class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.GET.status == 'approved' %}bg-black/20{% endif %}">
+                                Approved Appointments
+                            </a>
+                            <a href="{% url 'appointment_list' %}?status=declined"
+                               class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.GET.status == 'declined' %}bg-black/20{% endif %}">
+                                Declined Appointments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'student_list' %}"
+                   class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'student_list' %}bg-black/20{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Students
+                </a>
+
+                <a href="{% url 'session_history' %}"
+                   class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'session_history' %}bg-black/20{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    Session History
+                </a>
+
+                <a href="{% url 'reports_dashboard' %}"
+                   class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'reports_dashboard' %}bg-black/20{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Reports
+                </a>
+            {% else %}
+            <!-- Student Navigation -->
+                <div class="px-4 py-2 mt-4 text-xs uppercase text-emerald-300">
+                    Student Tools
+                </div>
+                <a href="{% url 'schedule_session' %}"
+                   class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/schedule-session/' %}bg-black/20{% endif %}">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    <span>Appointments</span>
-                    <svg class="w-4 h-4 ml-auto transform transition-transform duration-200" 
-                         :class="{'rotate-180': open}"
-                         fill="none" 
-                         stroke="currentColor" 
-                         viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    Schedule Session
+                </a>
+                <a href="{% url 'appointment_list' %}"
+                   class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/appointments/' %}bg-black/20{% endif %}">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                </button>
-                
-                <div x-show="open" 
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="transform opacity-0 scale-95"
-                     x-transition:enter-end="transform opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-75"
-                     x-transition:leave-start="transform opacity-100 scale-100"
-                     x-transition:leave-end="transform opacity-0 scale-95"
-                     class="relative left-0 w-full mt-1">
-                    <div class="bg-emerald-800/50 backdrop-blur-sm py-1">
-                        <a href="{% url 'appointment_list' %}" 
-                           class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/appointments/' and not request.GET.status %}bg-black/20{% endif %}">
-                            All Appointments
-                        </a>
-                        <a href="{% url 'appointment_list' %}?status=pending" 
-                           class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.GET.status == 'pending' %}bg-black/20{% endif %}">
-                            Pending Appointments
-                        </a>
-                        <a href="{% url 'appointment_list' %}?status=approved" 
-                           class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.GET.status == 'approved' %}bg-black/20{% endif %}">
-                            Approved Appointments
-                        </a>
-                        <a href="{% url 'appointment_list' %}?status=declined" 
-                           class="block px-8 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.GET.status == 'declined' %}bg-black/20{% endif %}">
-                            Declined Appointments
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <a href="{% url 'student_list' %}" 
-               class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'student_list' %}bg-black/20{% endif %}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-                Students
-            </a>
-
-            <a href="{% url 'session_history' %}"
-               class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'session_history' %}bg-black/20{% endif %}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                </svg>
-                Session History
-            </a>
-
-            <a href="{% url 'reports_dashboard' %}" 
-            class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.resolver_match.url_name == 'reports_dashboard' %}bg-black/20{% endif %}">
-             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-             </svg>
-             Reports
-         </a>
-            {% else %}
-            <!-- Student Navigation -->
-            <div class="px-4 py-2 mt-4 text-xs uppercase text-emerald-300">
-                Student Tools
-            </div>
-            <a href="{% url 'schedule_session' %}" 
-               class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/schedule-session/' %}bg-black/20{% endif %}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                Schedule Session
-            </a>
-            <a href="{% url 'appointment_list' %}" 
-               class="flex items-center px-4 py-2 text-sm hover:bg-black/20 transition-colors duration-200 {% if request.path == '/appointments/' %}bg-black/20{% endif %}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                My Appointments
-            </a>
+                    My Appointments
+                </a>
             {% endif %}
         </nav>
     </div>

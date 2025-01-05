@@ -1,3 +1,29 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView, UpdateView, TemplateView
+from django.contrib import messages
+from django.urls import reverse
+from django.conf import settings
+from django.utils import timezone
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q, Count
+from django.db.models.functions import TruncMonth
+from .forms import UserRegistrationForm, AppointmentForm, InterviewForm
+from .models import (
+    Student, Counselor, Appointment, GuidanceSession, 
+    FollowUp, Interview, Report
+)
+import json
+from datetime import datetime, timedelta
+import xlsxwriter
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+import os
+import csv
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm
@@ -24,7 +50,10 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 import os
 import csv
-
+from django.db.models import Q
+from django.core.files.base import ContentFile
+from django.utils import timezone
+from datetime import datetime, timedelta
 def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -32,26 +61,52 @@ def home(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect_user_by_role(request, request.user)
     
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                next_url = request.GET.get('next', 'dashboard')
-                messages.success(request, f'Welcome back, {user.username}!')
-                return redirect(next_url)
+        try:
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                if user.is_superuser or user.role == 'admin':  # Handle admin users
+                    login(request, user)
+                    messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                    return redirect('admin_dashboard')
+                elif user.is_active and user.approval_status == 'approved':
+                    login(request, user)
+                    messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                    return redirect_user_by_role(request, user)
+                else:
+                    if not user.is_active:
+                        messages.error(request, 'Your account is not active.')
+                    elif user.approval_status == 'pending':
+                        messages.error(request, 'Your account is pending approval.')
+                    elif user.approval_status == 'rejected':
+                        messages.error(request, 'Your account has been rejected.')
             else:
-                messages.error(request, 'Your account is not active. Please contact the administrator.')
-        else:
-            messages.error(request, 'Invalid username or password.')
+                messages.error(request, 'Invalid username or password.')
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}')
     
     return render(request, 'auth/login.html')
+
+def redirect_user_by_role(request, user):
+    try:
+        if user.is_superuser or user.role == 'admin':
+            return redirect('admin_dashboard')
+        elif user.role == 'student':
+            return redirect('student_dashboard')
+        elif user.role == 'counselor':
+            return redirect('counselor_dashboard')
+        else:
+            messages.warning(request, f'Unknown role: {user.role}')
+            return redirect('home')
+    except Exception as e:
+        messages.error(request, f'Error redirecting: {str(e)}')
+        return redirect('home')
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -68,13 +123,13 @@ def register_view(request):
             user.save()
             
             # Create the role-specific profile
-            if user.role == 'Student':
+            if user.role == 'student':
                 Student.objects.create(
                     user=user,
                     course=request.POST.get('course', ''),
                     year=request.POST.get('year', 1)
                 )
-            elif user.role == 'Counselor':
+            elif user.role == 'counselor':
                 Counselor.objects.create(
                     user=user,
                     email=user.email
@@ -96,8 +151,6 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    from django.utils import timezone
-    from datetime import datetime, timedelta
     today = timezone.now().date()
 
     context = {
@@ -105,7 +158,7 @@ def dashboard(request):
         'role': request.user.role,
     }
 
-    if request.user.role == 'Counselor':
+    if request.user.role == 'counselor':
         try:
             # Get counselor profile
             counselor = request.user.counselor_profile
@@ -176,7 +229,7 @@ def dashboard(request):
 
 @login_required
 def schedule_session(request):
-    if request.user.role != 'Student':
+    if request.user.role != 'student':
         messages.error(request, 'Only students can schedule counseling sessions.')
         return redirect('dashboard')
     
@@ -196,10 +249,10 @@ def schedule_session(request):
 @login_required
 def appointment_list(request):
     context = {}
-    if request.user.role == 'Student':
+    if request.user.role == 'student':
         appointments = Appointment.objects.filter(student=request.user.student_profile)
         context['is_counselor'] = False
-    elif request.user.role == 'Counselor':
+    elif request.user.role == 'counselor':
         appointments = Appointment.objects.filter(counselor=request.user.counselor_profile)
         context['is_counselor'] = True
     else:
@@ -217,7 +270,7 @@ def appointment_list(request):
 
 @login_required
 def update_appointment_status(request, appointment_id):
-    if request.user.role != 'Counselor':
+    if request.user.role != 'counselor':
         messages.error(request, 'Only counselors can approve or decline appointments.')
         return redirect('dashboard')
     
@@ -242,220 +295,6 @@ def update_appointment_status(request, appointment_id):
         return redirect('appointment_list')
 
 @login_required
-def start_guidance_session(request, appointment_id):
-    if request.user.role != 'Counselor':
-        messages.error(request, 'Only counselors can start guidance sessions.')
-        return redirect('appointment_list')
-    
-    try:
-        appointment = Appointment.objects.get(id=appointment_id, counselor=request.user.counselor_profile, status='approved')
-        
-        # Check if session already exists for this appointment
-        existing_session = GuidanceSession.objects.filter(appointment=appointment).first()
-        if existing_session:
-            messages.warning(request, 'A session already exists for this appointment.')
-            return redirect('guidance_session_detail', session_id=existing_session.id)
-        
-        if request.method == 'POST':
-            session_type = request.POST.get('session_type')
-            if session_type not in dict(GuidanceSession.SESSION_TYPE_CHOICES):
-                messages.error(request, 'Invalid session type.')
-                return redirect('appointment_list')
-            
-            # Create new guidance session
-            session = GuidanceSession.objects.create(
-                student=appointment.student,
-                counselor=appointment.counselor,
-                session_type=session_type,
-                appointment=appointment,
-                status='scheduled'
-            )
-            
-            # Start the session immediately
-            session.start_session()
-            
-            messages.success(request, 'Guidance session started successfully.')
-            return redirect('guidance_session_detail', session_id=session.id)
-        
-        return render(request, 'counseling/start_session.html', {'appointment': appointment})
-        
-    except Appointment.DoesNotExist:
-        messages.error(request, 'Appointment not found or not approved.')
-        return redirect('appointment_list')
-
-@login_required
-def start_followup_session(request, session_id):
-    if request.user.role != 'Counselor':
-        messages.error(request, 'Only counselors can start follow-up sessions.')
-        return redirect('session_history')
-    
-    try:
-        # Get the original session
-        original_session = GuidanceSession.objects.get(id=session_id)
-        
-        # Check if this counselor is authorized
-        if request.user.counselor_profile != original_session.counselor:
-            messages.error(request, 'You are not authorized to start this follow-up session.')
-            return redirect('session_history')
-        
-        # Check if the original session is completed
-        if original_session.status != 'completed':
-            messages.error(request, 'Can only create follow-ups for completed sessions.')
-            return redirect('guidance_session_detail', session_id=session_id)
-        
-        # Check if a follow-up session already exists
-        if hasattr(original_session, 'followup'):
-            followup = original_session.followup
-            if not followup.completed:
-                # If there's an uncompleted follow-up, create a new session for it
-                existing_followup_session = GuidanceSession.objects.filter(
-                    student=original_session.student,
-                    counselor=original_session.counselor,
-                    session_type='Follow-Up',
-                    status='scheduled'
-                ).first()
-                
-                if existing_followup_session:
-                    # Start the existing follow-up session
-                    existing_followup_session.start_session()
-                    messages.success(request, 'Follow-up session started successfully.')
-                    return redirect('guidance_session_detail', session_id=existing_followup_session.id)
-                else:
-                    # Create and start a new follow-up session
-                    followup_session = GuidanceSession.objects.create(
-                        student=original_session.student,
-                        counselor=original_session.counselor,
-                        session_type='Follow-Up',
-                        status='scheduled'
-                    )
-                    followup_session.start_session()
-                    messages.success(request, 'Follow-up session started successfully.')
-                    return redirect('guidance_session_detail', session_id=followup_session.id)
-            else:
-                messages.error(request, 'The follow-up for this session has already been completed.')
-                return redirect('guidance_session_detail', session_id=session_id)
-        else:
-            messages.error(request, 'No follow-up scheduled for this session.')
-            return redirect('guidance_session_detail', session_id=session_id)
-            
-    except GuidanceSession.DoesNotExist:
-        messages.error(request, 'Session not found.')
-        return redirect('session_history')
-
-@login_required
-def guidance_session_detail(request, session_id):
-    try:
-        session = GuidanceSession.objects.get(id=session_id)
-        
-        # Ensure only the counselor and student involved can access the session
-        if request.user.role == 'Counselor' and request.user.counselor_profile != session.counselor:
-            messages.error(request, 'You do not have permission to view this session.')
-            return redirect('session_history')
-        elif request.user.role == 'Student' and request.user.student_profile != session.student:
-            messages.error(request, 'You do not have permission to view this session.')
-            return redirect('session_history')
-        
-        if request.method == 'POST':
-            if request.user.role != 'Counselor':
-                messages.error(request, 'Only counselors can update sessions.')
-                return redirect('guidance_session_detail', session_id=session.id)
-
-            # Handle session end
-            if 'end_session' in request.POST:
-                if session.status != 'in_progress':
-                    messages.error(request, 'Can only end sessions that are in progress.')
-                    return redirect('guidance_session_detail', session_id=session.id)
-
-                session.end_session(
-                    problem_statement=request.POST.get('problem_statement', ''),
-                    recommendations=request.POST.get('recommendations', ''),
-                    notes=request.POST.get('notes', ''),
-                    action_items=request.POST.get('action_items', ''),
-                    next_steps=request.POST.get('next_steps', '')
-                )
-                
-                # Create follow-up if requested
-                if request.POST.get('schedule_followup'):
-                    followup_date = request.POST.get('followup_date')
-                    if followup_date:
-                        FollowUp.objects.create(
-                            session=session,
-                            followup_date=followup_date,
-                            followup_notes=request.POST.get('followup_notes', '')
-                        )
-                        messages.success(request, 'Follow-up scheduled successfully.')
-                
-                messages.success(request, 'Guidance session ended successfully.')
-                return redirect('completed_sessions')
-            
-            # Handle session cancellation
-            elif 'cancel_session' in request.POST:
-                if session.status not in ['scheduled', 'in_progress']:
-                    messages.error(request, 'Cannot cancel a completed or already cancelled session.')
-                    return redirect('guidance_session_detail', session_id=session.id)
-
-                session.cancel_session()
-                messages.success(request, 'Session cancelled successfully.')
-                return redirect('session_history')
-            
-            # Handle session start
-            elif 'start_session' in request.POST:
-                if session.status != 'scheduled':
-                    messages.error(request, 'Can only start scheduled sessions.')
-                    return redirect('guidance_session_detail', session_id=session.id)
-
-                session.start_session()
-                messages.success(request, 'Session started successfully.')
-                return redirect('guidance_session_detail', session_id=session.id)
-
-        context = {
-            'session': session,
-            'can_modify': request.user.role == 'Counselor' and request.user.counselor_profile == session.counselor
-        }
-        
-        return render(request, 'counseling/session_detail.html', context)
-        
-    except GuidanceSession.DoesNotExist:
-        messages.error(request, 'Session not found.')
-        return redirect('session_history')
-
-@login_required
-def completed_sessions(request):
-    # Get the filter parameters
-    session_type = request.GET.get('type', '')
-    date_filter = request.GET.get('date', '')
-    status_filter = request.GET.get('status', 'completed')  # Default to showing completed sessions
-
-    # Base query for sessions
-    if request.user.role == 'Counselor':
-        sessions = GuidanceSession.objects.filter(counselor=request.user.counselor_profile)
-    else:  # Student
-        sessions = GuidanceSession.objects.filter(student=request.user.student_profile)
-
-    # Apply filters
-    if status_filter:
-        sessions = sessions.filter(status=status_filter)
-    if session_type:
-        sessions = sessions.filter(session_type=session_type)
-    if date_filter:
-        sessions = sessions.filter(date=date_filter)
-
-    # Order by most recent first
-    sessions = sessions.order_by('-created_at')
-
-    context = {
-        'sessions': sessions,
-        'session_types': GuidanceSession.SESSION_TYPE_CHOICES,
-        'status_choices': GuidanceSession.STATUS_CHOICES,
-        'current_filters': {
-            'type': session_type,
-            'date': date_filter,
-            'status': status_filter
-        }
-    }
-    return render(request, 'counseling/completed_sessions.html', context)
-
-@login_required
 def session_history(request):
     # Get filter parameters
     status_filter = request.GET.get('status', '')
@@ -464,7 +303,7 @@ def session_history(request):
     page = request.GET.get('page', 1)
 
     # Base query
-    if request.user.role == 'Counselor':
+    if request.user.role == 'counselor':
         sessions = GuidanceSession.objects.filter(counselor=request.user.counselor_profile)
     else:  # Student
         sessions = GuidanceSession.objects.filter(student=request.user.student_profile)
@@ -503,7 +342,7 @@ def session_history(request):
 
 @login_required
 def reschedule_appointment(request, appointment_id):
-    if request.user.role != 'Counselor':
+    if request.user.role != 'counselor':
         messages.error(request, 'Only counselors can reschedule appointments.')
         return redirect('appointment_list')
     
@@ -577,12 +416,14 @@ def create_interview_form(request, student_id):
 
 @login_required
 def view_interview_form(request, form_id):
-    interview_form = Interview.objects.get(id=form_id)
-    return render(request, 'counseling/interview_form.html', {
-        'form': interview_form,
-        'student': interview_form.student,
-        'view_only': True
-    })
+    try:
+        interview = Interview.objects.get(id=form_id)
+        return render(request, 'admin/view_interview_form.html', {
+            'interview': interview
+        })
+    except Interview.DoesNotExist:
+        messages.error(request, "Interview form not found.")
+        return redirect('admin_students')
 
 class StudentListView(LoginRequiredMixin, ListView):
     model = Student
@@ -619,6 +460,84 @@ class EditStudentView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Student profile updated successfully.')
         return super().form_valid(form)
+
+class CounselorListView(LoginRequiredMixin, ListView):
+    model = Counselor
+    template_name = 'admin/counselors.html'
+    context_object_name = 'counselors'
+    paginate_by = 12
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search = self.request.GET.get('search', '')
+        status = self.request.GET.get('status', '')
+
+        if search:
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(user__email__icontains=search)
+            )
+
+        if status:
+            is_active = status == 'active'
+            queryset = queryset.filter(user__is_active=is_active)
+
+        # Annotate with active students count
+        queryset = queryset.annotate(
+            active_students_count=Count(
+                'sessions__student',
+                filter=Q(sessions__student__user__is_active=True),
+                distinct=True
+            )
+        )
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_page'] = 'counselors'
+        return context
+
+class AppointmentListView(LoginRequiredMixin, ListView):
+    model = Appointment
+    template_name = 'admin/appointments.html'
+    context_object_name = 'appointments'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-date', '-time')
+        
+        # Apply filters
+        status = self.request.GET.get('status', '')
+        date_from = self.request.GET.get('date_from', '')
+        date_to = self.request.GET.get('date_to', '')
+        search = self.request.GET.get('search', '')
+
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        if date_from:
+            queryset = queryset.filter(date__gte=date_from)
+        
+        if date_to:
+            queryset = queryset.filter(date__lte=date_to)
+        
+        if search:
+            queryset = queryset.filter(
+                Q(student__user__first_name__icontains=search) |
+                Q(student__user__last_name__icontains=search) |
+                Q(counselor__user__first_name__icontains=search) |
+                Q(counselor__user__last_name__icontains=search) |
+                Q(purpose__icontains=search)
+            )
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_page'] = 'appointments'
+        return context
 
 class ReportsDashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'reports/reports_dashboard.html'
@@ -1142,3 +1061,313 @@ def generate_csv_report(report_type, start_date, end_date):
                 ])
 
     return temp_file
+
+@login_required
+def counselor_dashboard(request):
+    if not request.user.role == 'counselor':
+        messages.error(request, 'Access denied. You must be a counselor to view this page.')
+        return redirect('home')
+    
+    # Get counselor-specific data
+    counselor = Counselor.objects.get(user=request.user)
+    
+    # Get pending appointments
+    pending_appointments_count = Appointment.objects.filter(
+        counselor=counselor,
+        status='pending'
+    ).count()
+    
+    # Get total students
+    total_students = Student.objects.count()
+    
+    # Get completed sessions count
+    completed_sessions = GuidanceSession.objects.filter(
+        counselor=counselor
+    ).count()
+    
+    # Get upcoming appointments
+    upcoming_appointments = Appointment.objects.filter(
+        counselor=counselor,
+        date__gte=timezone.now().date()
+    ).order_by('date', 'time')[:10]
+    
+    # Get recent interviews
+    recent_interviews = Interview.objects.filter(
+        counselor=counselor
+    ).order_by('-date')[:10]
+    
+    context = {
+        'counselor': counselor,
+        'pending_appointments_count': pending_appointments_count,
+        'total_students': total_students,
+        'completed_sessions': completed_sessions,
+        'upcoming_appointments': upcoming_appointments,
+        'recent_interviews': recent_interviews,
+    }
+    return render(request, 'counselor/dashboard.html', context)
+
+@login_required
+def student_dashboard(request):
+    if not request.user.role == 'student':
+        messages.error(request, 'Access denied. You must be a student to view this page.')
+        return redirect('home')
+    
+    # Get student-specific data
+    student = Student.objects.get(user=request.user)
+    appointments = Appointment.objects.filter(student=student).order_by('-date')
+    sessions = GuidanceSession.objects.filter(student=student).order_by('-date')
+    
+    context = {
+        'student': student,
+        'appointments': appointments[:5],  # Show last 5 appointments
+        'sessions': sessions[:5],  # Show last 5 sessions
+    }
+    return render(request, 'dashboard/student_dashboard.html', context)
+
+@login_required
+def admin_reports(request):
+    if not request.user.is_superuser and request.user.role != 'admin':
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('home')
+    
+    context = {
+        'counselors': Counselor.objects.all(),
+        'recent_reports': Report.objects.all().order_by('-generated_at')[:5],
+        'current_page': 'reports'
+    }
+    return render(request, 'admin/reports.html', context)
+
+@login_required
+def generate_sessions_report(request):
+    if not request.user.is_superuser and request.user.role != 'admin':
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home')
+    
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    sessions = GuidanceSession.objects.all()
+    if start_date:
+        sessions = sessions.filter(date__gte=start_date)
+    if end_date:
+        sessions = sessions.filter(date__lte=end_date)
+    
+    # Create report
+    report = Report.objects.create(
+        name=f"Sessions Report ({start_date} to {end_date})",
+        report_type='sessions',
+        generated_by=request.user
+    )
+    
+    # Generate PDF report
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    
+    # Add report content
+    p.drawString(100, 750, f"Sessions Report ({start_date} to {end_date})")
+    y = 700
+    for session in sessions:
+        p.drawString(100, y, f"Session: {session.student.user.get_full_name()} - {session.date}")
+        y -= 20
+    
+    p.save()
+    buffer.seek(0)
+    report.file.save(f'sessions_report_{start_date}_{end_date}.pdf', ContentFile(buffer.getvalue()))
+    
+    messages.success(request, "Sessions report generated successfully.")
+    return redirect('view_report', report_id=report.id)
+
+@login_required
+def generate_student_report(request):
+    if not request.user.is_superuser and request.user.role != 'admin':
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home')
+    
+    report_type = request.GET.get('report_type', 'demographics')
+    
+    # Create report
+    report = Report.objects.create(
+        name=f"Student {report_type.title()} Report",
+        report_type='student',
+        generated_by=request.user
+    )
+    
+    # Generate Excel report
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet()
+    
+    # Add headers
+    headers = ['Student Name', 'Year Level', 'Course']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+    
+    # Add data
+    students = Student.objects.all()
+    for row, student in enumerate(students, start=1):
+        worksheet.write(row, 0, student.user.get_full_name())
+        worksheet.write(row, 1, student.year_level)
+        worksheet.write(row, 2, student.course)
+    
+    workbook.close()
+    output.seek(0)
+    report.file.save(f'student_report_{report_type}.xlsx', ContentFile(output.getvalue()))
+    
+    messages.success(request, f"Student {report_type} report generated successfully.")
+    return redirect('view_report', report_id=report.id)
+
+@login_required
+def generate_counselor_report(request):
+    if not request.user.is_superuser and request.user.role != 'admin':
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home')
+    
+    counselor_id = request.GET.get('counselor_id')
+    
+    # Filter counselors
+    counselors = Counselor.objects.all()
+    if counselor_id:
+        counselors = counselors.filter(id=counselor_id)
+    
+    # Create report
+    report = Report.objects.create(
+        name="Counselor Performance Report",
+        report_type='counselor',
+        generated_by=request.user
+    )
+    
+    # Generate Excel report
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet()
+    
+    # Add headers
+    headers = ['Counselor Name', 'Total Sessions', 'Active Students']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+    
+    # Add data
+    for row, counselor in enumerate(counselors, start=1):
+        worksheet.write(row, 0, counselor.user.get_full_name())
+        worksheet.write(row, 1, GuidanceSession.objects.filter(counselor=counselor).count())
+        worksheet.write(row, 2, Student.objects.filter(counselor=counselor).count())
+    
+    workbook.close()
+    output.seek(0)
+    report.file.save('counselor_performance_report.xlsx', ContentFile(output.getvalue()))
+    
+    messages.success(request, "Counselor performance report generated successfully.")
+    return redirect('view_report', report_id=report.id)
+
+@login_required
+def generate_appointment_report(request):
+    if not request.user.is_superuser and request.user.role != 'admin':
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home')
+    
+    time_period = request.GET.get('time_period', 'month')
+    
+    # Calculate date range
+    end_date = timezone.now()
+    if time_period == 'week':
+        start_date = end_date - timedelta(days=7)
+    elif time_period == 'month':
+        start_date = end_date - timedelta(days=30)
+    elif time_period == 'quarter':
+        start_date = end_date - timedelta(days=90)
+    else:  # year
+        start_date = end_date - timedelta(days=365)
+    
+    appointments = Appointment.objects.filter(
+        date__range=[start_date, end_date]
+    ).order_by('date')
+    
+    # Create report
+    report = Report.objects.create(
+        name=f"Appointment Analytics Report - Last {time_period}",
+        report_type='appointment',
+        generated_by=request.user
+    )
+    
+    # Generate Excel report
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    worksheet = workbook.add_worksheet()
+    
+    # Add headers
+    headers = ['Date', 'Student', 'Counselor', 'Status']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header)
+    
+    # Add data
+    for row, appointment in enumerate(appointments, start=1):
+        worksheet.write(row, 0, appointment.date.strftime('%Y-%m-%d'))
+        worksheet.write(row, 1, appointment.student.user.get_full_name())
+        worksheet.write(row, 2, appointment.counselor.user.get_full_name())
+        worksheet.write(row, 3, appointment.status)
+    
+    workbook.close()
+    output.seek(0)
+    report.file.save(f'appointment_report_{time_period}.xlsx', ContentFile(output.getvalue()))
+    
+    messages.success(request, "Appointment analytics report generated successfully.")
+    return redirect('view_report', report_id=report.id)
+
+@login_required
+def generate_custom_report(request):
+    if not request.user.is_superuser and request.user.role != 'admin':
+        messages.error(request, "You don't have permission to generate reports.")
+        return redirect('home')
+    
+    metrics = request.GET.getlist('metrics[]')
+    
+    # Create report
+    report = Report.objects.create(
+        name="Custom Report",
+        report_type='custom',
+        generated_by=request.user
+    )
+    
+    # Generate Excel report
+    output = BytesIO()
+    workbook = xlsxwriter.Workbook(output)
+    
+    if 'sessions' in metrics:
+        worksheet = workbook.add_worksheet('Sessions')
+        sessions = GuidanceSession.objects.all()
+        worksheet.write(0, 0, 'Date')
+        worksheet.write(0, 1, 'Student')
+        worksheet.write(0, 2, 'Counselor')
+        for row, session in enumerate(sessions, start=1):
+            worksheet.write(row, 0, session.date.strftime('%Y-%m-%d'))
+            worksheet.write(row, 1, session.student.user.get_full_name())
+            worksheet.write(row, 2, session.counselor.user.get_full_name())
+    
+    if 'students' in metrics:
+        worksheet = workbook.add_worksheet('Students')
+        students = Student.objects.all()
+        worksheet.write(0, 0, 'Name')
+        worksheet.write(0, 1, 'Year Level')
+        worksheet.write(0, 2, 'Course')
+        for row, student in enumerate(students, start=1):
+            worksheet.write(row, 0, student.user.get_full_name())
+            worksheet.write(row, 1, student.year_level)
+            worksheet.write(row, 2, student.course)
+    
+    if 'appointments' in metrics:
+        worksheet = workbook.add_worksheet('Appointments')
+        appointments = Appointment.objects.all()
+        worksheet.write(0, 0, 'Date')
+        worksheet.write(0, 1, 'Student')
+        worksheet.write(0, 2, 'Status')
+        for row, appointment in enumerate(appointments, start=1):
+            worksheet.write(row, 0, appointment.date.strftime('%Y-%m-%d'))
+            worksheet.write(row, 1, appointment.student.user.get_full_name())
+            worksheet.write(row, 2, appointment.status)
+    
+    workbook.close()
+    output.seek(0)
+    report.file.save('custom_report.xlsx', ContentFile(output.getvalue()))
+    
+    messages.success(request, "Custom report generated successfully.")
+    return redirect('view_report', report_id=report.id)

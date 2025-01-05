@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-50">
+        {% include 'includes/admin_sidebar.html' %}
+
+    <!-- Main Content Area -->
+        <div class="flex-1 ml-64 p-8 overflow-y-auto">
+            <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-gray-900">Edit User</h1>
+                    <p class="text-sm text-gray-600">Update user information</p>
+                </div>
+
+            <!-- Form -->
+                <div class="bg-white shadow rounded-lg">
+                    <form method="post" enctype="multipart/form-data" class="space-y-6 p-6">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="rounded-md bg-red-50 p-4 mb-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-red-800">There were errors with your submission</h3>
+                                        <div class="mt-2 text-sm text-red-700">
+                                            <ul class="list-disc pl-5 space-y-1">
+                                                {% for error in form.non_field_errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="grid grid-cols-1 gap-6">
+                        <!-- Profile Picture -->
+                            <div class="flex justify-center">
+                                {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="h-32 w-32 rounded-full">
+                                {% else %}
+                                    <div class="h-32 w-32 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <span class="text-4xl text-gray-500 font-medium">{{ user.first_name|first|upper }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                        <!-- Username -->
+                            <div>
+                                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Username
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- Email -->
+                            <div>
+                                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Email
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- First Name -->
+                            <div>
+                                <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    First Name
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- Last Name -->
+                            <div>
+                                <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Last Name
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- Role -->
+                            <div>
+                                <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Role
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.role }}
+                                    {% if form.role.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.role.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- Password -->
+                            <div>
+                                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    New Password (leave blank to keep current)
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.password }}
+                                    {% if form.password.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- Profile Picture -->
+                            <div>
+                                <label for="{{ form.profile_picture.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Update Profile Picture
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.profile_picture }}
+                                    {% if form.profile_picture.errors %}
+                                        <p class="mt-2 text-sm text-red-600">{{ form.profile_picture.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <!-- Status -->
+                            <div>
+                                <div class="relative flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input id="is_active" name="is_active" type="checkbox" class="focus:ring-emerald-500 h-4 w-4 text-emerald-600 border-gray-300 rounded" {% if user.is_active %}checked{% endif %}>
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="is_active" class="font-medium text-gray-700">Active Account</label>
+                                        <p class="text-gray-500">User can log in and access the system when active</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex items-center justify-end space-x-4">
+                            <a href="{% url 'admin_users' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Cancel
+                            </a>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

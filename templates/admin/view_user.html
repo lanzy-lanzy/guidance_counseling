@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block navigation %}{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0 text-gray-800">User Details</h1>
+            <div>
+                <a href="{% url 'admin_edit_user' user.id %}" class="btn btn-primary">Edit User</a>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="row">
+        <!-- User Profile Card -->
+            <div class="col-xl-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Profile Information</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" class="img-profile rounded-circle mb-3" style="width: 150px; height: 150px;">
+                        {% else %}
+                            <img src="{% static 'img/default-profile.png' %}" class="img-profile rounded-circle mb-3" style="width: 150px; height: 150px;">
+                        {% endif %}
+                        <h4 class="mb-0">{{ user.get_full_name }}</h4>
+                        <p class="text-muted">@{{ user.username }}</p>
+                        <div class="mb-2">
+                            <span class="badge badge-{% if user.role == 'Student' %}info{% else %}success{% endif %}">{{ user.role }}</span>
+                            <span class="badge badge-{{ user.approval_status }}">{{ user.approval_status|title }}</span>
+                        </div>
+                        <p class="mb-0"><i class="fas fa-envelope mr-2"></i>{{ user.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+        <!-- User Details -->
+            <div class="col-xl-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Account Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Date Joined:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+                                <p><strong>Last Login:</strong> {{ user.last_login|default_if_none:"Never" }}</p>
+                                <p><strong>Account Status:</strong>
+                                    {% if user.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Inactive</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>User ID:</strong> {{ user.id }}</p>
+                                <p><strong>Is Staff:</strong> {{ user.is_staff|yesno:"Yes,No" }}</p>
+                                <p><strong>Is Superuser:</strong> {{ user.is_superuser|yesno:"Yes,No" }}</p>
+                            </div>
+                        </div>
+
+                        {% if profile %}
+                            <hr>
+                            <h6 class="font-weight-bold">Role-Specific Information</h6>
+                            {% if user.role == 'Student' %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Course:</strong> {{ profile.course }}</p>
+                                        <p><strong>Year:</strong> {{ profile.year }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Contact Number:</strong> {{ profile.contact_number|default:"Not provided" }}</p>
+                                        <p><strong>Reason for Referral:</strong> {{ profile.reason_for_referral|default:"Not provided" }}</p>
+                                    </div>
+                                </div>
+                            {% elif user.role == 'Counselor' %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Email:</strong> {{ profile.email }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+            <!-- Activity Log -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if user.role == 'Student' %}
+                            <h6>Recent Sessions</h6>
+                            {% for session in profile.sessions.all|slice:":5" %}
+                                <div class="activity-item">
+                                    <span class="text-primary">{{ session.date|date:"F d, Y" }}</span> -
+                                    {{ session.session_type }} session with {{ session.counselor.user.get_full_name }}
+                                </div>
+                            {% empty %}
+                                <p>No recent sessions found.</p>
+                            {% endfor %}
+                        {% elif user.role == 'Counselor' %}
+                            <h6>Recent Appointments</h6>
+                            {% for appointment in profile.appointments.all|slice:":5" %}
+                                <div class="activity-item">
+                                    <span class="text-primary">{{ appointment.date|date:"F d, Y" }}</span> -
+                                    Appointment with {{ appointment.student.user.get_full_name }}
+                                </div>
+                            {% empty %}
+                                <p>No recent appointments found.</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

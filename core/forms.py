@@ -55,6 +55,62 @@ class AppointmentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['counselor'].queryset = Counselor.objects.all()
 
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        time = cleaned_data.get('time')
+        counselor = cleaned_data.get('counselor')
+
+        if not date or not time or not counselor:
+            return cleaned_data
+
+        # Check if date is not in the past
+        from django.utils import timezone
+        current_date = timezone.now().date()
+        if date < current_date:
+            raise forms.ValidationError("Cannot schedule appointments in the past.")
+
+        # Check if time is within business hours (8 AM to 5 PM)
+        from datetime import time as dt_time
+        if time < dt_time(8, 0) or time > dt_time(17, 0):
+            raise forms.ValidationError("Appointments must be scheduled between 8:00 AM and 5:00 PM.")
+
+        # Check for double booking
+        from django.db.models import Q
+        existing_appointment = Appointment.objects.filter(
+            counselor=counselor,
+            date=date,
+            time=time,
+            status__in=['pending', 'approved']
+        ).exists()
+
+        if existing_appointment:
+            raise forms.ValidationError("This time slot is already booked. Please select a different time.")
+
+        return cleaned_data
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'role', 'is_active']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.update({
+                    'class': 'mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md'
+                })
+
 
 class InterviewForm(forms.ModelForm):
     class Meta:

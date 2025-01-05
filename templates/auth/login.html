@@ -1,111 +1,90 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
-<!-- Add Font Awesome CDN in the header -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% block title %}Login{% endblock %}
+{% block navigation %}{% endblock %}
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-[1.01] transition-all duration-300">
-            <!-- Header with gradient and pattern -->
-            <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-8 relative overflow-hidden">
-                <div class="absolute inset-0 bg-black opacity-10 pattern-dots"></div>
-                <div class="relative">
-                    <div class="flex items-center justify-center space-x-6">
-                        <div class="w-20 transform hover:scale-110 transition-transform duration-300">
-                            <img src="{% static 'images/jhcsc_logo.png' %}" alt="JHCSC Logo" class="w-full filter drop-shadow-md">
-                        </div>
-                        <div class="text-center">
-                            <h4 class="text-2xl font-bold tracking-tight">J.H. CERILLES STATE COLLEGE</h4>
-                            <h5 class="text-lg mt-1 font-medium opacity-90">GUIDANCE & COUNSELING OFFICE</h5>
-                        </div>
-                        <div class="w-20 transform hover:scale-110 transition-transform duration-300">
-                            <img src="{% static 'images/counseling_logo.png' %}" alt="Guidance Logo" class="w-full filter drop-shadow-md">
-                        </div>
-                    </div>
-                </div>
+{% block content %}
+    <div class="min-h-screen bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Welcome Back</h2>
+                <p class="text-sm text-gray-600">Sign in to your account to continue</p>
             </div>
 
-            <!-- Login Form -->
-            <div class="p-8">
-                <div class="text-center mb-8">
-                    <h4 class="text-2xl font-bold text-gray-900">Sign in to your account</h4>
-                    <p class="mt-2 text-base text-gray-600">
-                        Don't have an account?
-                        <a href="{% url 'register' %}" class="font-medium text-emerald-600 hover:text-emerald-700 transition-colors duration-200 border-b-2 border-transparent hover:border-emerald-600">
-                            <i class="fas fa-user-plus mr-1"></i> Register here
-                        </a>
-                    </p>
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                        <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
+                            <p class="text-sm">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form class="mt-8 space-y-6" method="POST">
+                {% csrf_token %}
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="username" class="sr-only">Username</label>
+                        <input id="username" name="username" type="text" required
+                               class="appearance-none rounded-t-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                               placeholder="Username">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Password</label>
+                        <input id="password" name="password" type="password" required
+                               class="appearance-none rounded-b-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                               placeholder="Password">
+                    </div>
                 </div>
 
-                <form class="space-y-6" action="{% url 'login' %}" method="POST">
-                    {% csrf_token %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="{% if message.tags == 'success' %}bg-green-50 text-green-800 border-green-200{% else %}bg-red-50 text-red-800 border-red-200{% endif %} px-4 py-3 rounded-lg border animate-fadeIn shadow-sm" role="alert">
-                                <p class="text-sm font-medium">
-                                    <i class="{% if message.tags == 'success' %}fas fa-check-circle{% else %}fas fa-exclamation-circle{% endif %} mr-2"></i>
-                                    {{ message }}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <div class="group">
-                        <label for="username" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-user mr-2"></i>Username
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember_me" name="remember_me" type="checkbox"
+                               class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded">
+                        <label for="remember_me" class="ml-2 block text-sm text-gray-900">
+                            Remember me
                         </label>
-                        <div class="mt-1 relative">
-                            <input id="username" name="username" type="text" autocomplete="username" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                placeholder="Enter your username">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-user text-gray-400"></i>
-                            </div>
-                        </div>
                     </div>
 
-                    <div class="group">
-                        <label for="password" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-lock mr-2"></i>Password
-                        </label>
-                        <div class="mt-1 relative">
-                            <input id="password" name="password" type="password" autocomplete="current-password" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                placeholder="Enter your password">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-gray-400"></i>
-                            </div>
-                        </div>
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-emerald-600 hover:text-emerald-500">
+                            Forgot your password?
+                        </a>
                     </div>
+                </div>
 
-                    <div class="pt-4">
-                        <button type="submit"
-                            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transform hover:scale-[1.02] transition-all duration-200">
-                            <i class="fas fa-sign-in-alt mr-2"></i>
-                            Sign in
-                        </button>
+                <div>
+                    <button type="submit"
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <svg class="h-5 w-5 text-emerald-500 group-hover:text-emerald-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                        Sign in
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
                     </div>
-                </form>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Don't have an account?</span>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <a href="{% url 'register' %}"
+                       class="w-full flex justify-center py-3 px-4 border border-emerald-300 rounded-md shadow-sm text-sm font-medium text-emerald-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                        Create new account
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<style>
-    .pattern-dots {
-        background-image: radial-gradient(currentColor 1px, transparent 1px);
-        background-size: calc(10 * 1px) calc(10 * 1px);
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .animate-fadeIn {
-        animation: fadeIn 0.5s ease-out;
-    }
-</style>
 {% endblock %}

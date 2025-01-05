@@ -1,261 +1,167 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Register{% endblock %}
+{% block navigation %}{% endblock %}
+
 {% block content %}
-<!-- Add Font Awesome CDN in the header -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-[1.01] transition-all duration-300">
-            <!-- Header with gradient and pattern -->
-            <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 text-white p-8 relative overflow-hidden">
-                <div class="absolute inset-0 bg-black opacity-10 pattern-dots"></div>
-                <div class="relative">
-                    <div class="flex items-center justify-center space-x-6">
-                        <div class="w-20 transform hover:scale-110 transition-transform duration-300">
-                            <img src="{% static 'images/jhcsc_logo.png' %}" alt="JHCSC Logo" class="w-full filter drop-shadow-md">
-                        </div>
-                        <div class="text-center">
-                            <h4 class="text-2xl font-bold tracking-tight">J.H. CERILLES STATE COLLEGE</h4>
-                            <h5 class="text-lg mt-1 font-medium opacity-90">GUIDANCE & COUNSELING OFFICE</h5>
-                        </div>
-                        <div class="w-20 transform hover:scale-110 transition-transform duration-300">
-                            <img src="{% static 'images/counseling_logo.png' %}" alt="Guidance Logo" class="w-full filter drop-shadow-md">
-                        </div>
-                    </div>
-                </div>
+    <div class="min-h-screen bg-gradient-to-br from-emerald-500 to-emerald-700 py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl">
+        <!-- Header Section -->
+            <div class="px-8 py-6 border-b border-gray-200 space-y-2">
+                <h2 class="text-3xl font-extrabold text-gray-900">Create Account</h2>
+                <p class="text-sm text-gray-600">Join our guidance counseling system</p>
             </div>
 
-            <!-- Registration Form -->
-            <div class="p-8">
-                <div class="text-center mb-8">
-                    <h4 class="text-2xl font-bold text-gray-900">Create your account</h4>
-                    <p class="mt-2 text-base text-gray-600">
-                        Already have an account?
-                        <a href="{% url 'login' %}" class="font-medium text-emerald-600 hover:text-emerald-700 transition-colors duration-200 border-b-2 border-transparent hover:border-emerald-600">
-                            <i class="fas fa-sign-in-alt mr-1"></i> Sign in here
-                        </a>
-                    </p>
+        <!-- Messages Section -->
+            {% if messages %}
+                <div class="px-8 py-4 bg-gray-50 border-b border-gray-200">
+                    {% for message in messages %}
+                        <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
+                            <p class="text-sm font-medium">{{ message }}</p>
+                            {% if message.tags == 'success' %}
+                                <p class="text-xs mt-1">Your account is pending approval. We'll notify you once it's approved.</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        <!-- Registration Form -->
+            <form method="POST" class="px-8 py-6 space-y-6">
+                {% csrf_token %}
+
+            <!-- Personal Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" name="first_name" id="first_name" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" name="last_name" id="last_name" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" name="email" id="email" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
                 </div>
 
-                <form class="space-y-6" method="POST" action="{% url 'register' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="{% if message.tags == 'success' %}bg-green-50 text-green-800 border-green-200{% else %}bg-red-50 text-red-800 border-red-200{% endif %} px-4 py-3 rounded-lg border animate-fadeIn shadow-sm" role="alert">
-                                <p class="text-sm font-medium">
-                                    <i class="{% if message.tags == 'success' %}fas fa-check-circle{% else %}fas fa-exclamation-circle{% endif %} mr-2"></i>
-                                    {{ message }}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+            <!-- Account Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <input type="text" name="username" id="username" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
 
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                        <select name="role" id="role" required
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                            <option value="">Select Role</option>
+                            <option value="student">Student</option>
+                            <option value="counselor">Counselor</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="password1" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" name="password1" id="password1" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                        <input type="password" name="password2" id="password2" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                    </div>
+                </div>
+
+            <!-- Student-specific fields (shown/hidden based on role) -->
+                <div id="student_fields" class="hidden space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="group">
-                            <label for="first_name" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                                <i class="fas fa-user mr-2"></i>First Name
-                            </label>
-                            <div class="mt-1 relative">
-                                <input type="text" name="first_name" id="first_name" required
-                                    class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                    placeholder="Enter your first name">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user-circle text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="group">
-                            <label for="last_name" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                                <i class="fas fa-user mr-2"></i>Last Name
-                            </label>
-                            <div class="mt-1 relative">
-                                <input type="text" name="last_name" id="last_name" required
-                                    class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                    placeholder="Enter your last name">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-user-circle text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="group">
-                        <label for="username" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-at mr-2"></i>Username
-                        </label>
-                        <div class="mt-1 relative">
-                            <input type="text" name="username" id="username" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                placeholder="Choose a username">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-at text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="group">
-                        <label for="email" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-envelope mr-2"></i>Email
-                        </label>
-                        <div class="mt-1 relative">
-                            <input type="email" name="email" id="email" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                placeholder="Enter your email">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-envelope text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="group">
-                        <label for="role" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-user-tag mr-2"></i>Role
-                        </label>
-                        <div class="mt-1 relative">
-                            <select id="role" name="role" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                onchange="toggleRoleFields(this.value)">
-                                <option value="">Select a role</option>
-                                <option value="Student">Student</option>
-                                <option value="Counselor">Counselor</option>
+                        <div>
+                            <label for="year_level" class="block text-sm font-medium text-gray-700">Year Level</label>
+                            <select name="year_level" id="year_level"
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                                <option value="">Select Year Level</option>
+                                <option value="1">First Year</option>
+                                <option value="2">Second Year</option>
+                                <option value="3">Third Year</option>
+                                <option value="4">Fourth Year</option>
                             </select>
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-user-tag text-gray-400"></i>
-                            </div>
                         </div>
-                    </div>
 
-                    <!-- Student-specific fields -->
-                    <div id="student-fields" style="display: none;" class="space-y-6">
-                        <div class="group">
-                            <label for="course" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                                <i class="fas fa-graduation-cap mr-2"></i>Course
-                            </label>
-                            <div class="mt-1 relative">
-                                <select name="course" id="course"
-                                    class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200">
-                                    <option value="">Select your course</option>
-                                    <option value="BSIT">Bachelor of Science in Information Technology</option>
-                                    <option value="BSEd">Bachelor of Secondary Education</option>
-                                    <option value="BEEd">Bachelor of Elementary Education</option>
-                                    <option value="BSBA">Bachelor of Science in Business Administration</option>
-                                    <option value="BSA">Bachelor of Science in Agriculture</option>
-                                </select>
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-graduation-cap text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="group">
-                            <label for="year" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                                <i class="fas fa-calendar-alt mr-2"></i>Year Level
-                            </label>
-                            <div class="mt-1 relative">
-                                <select name="year" id="year"
-                                    class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200">
-                                    <option value="">Select your year level</option>
-                                    <option value="1">1st Year</option>
-                                    <option value="2">2nd Year</option>
-                                    <option value="3">3rd Year</option>
-                                    <option value="4">4th Year</option>
-                                </select>
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-calendar-alt text-gray-400"></i>
-                                </div>
-                            </div>
+                        <div>
+                            <label for="course" class="block text-sm font-medium text-gray-700">Course</label>
+                            <input type="text" name="course" id="course"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
                         </div>
                     </div>
+                </div>
 
-                    <div class="group">
-                        <label for="password1" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-lock mr-2"></i>Password
-                        </label>
-                        <div class="mt-1 relative">
-                            <input type="password" name="password1" id="password1" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                placeholder="Create a password">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-gray-400"></i>
-                            </div>
-                        </div>
+            <!-- Counselor-specific fields (shown/hidden based on role) -->
+                <div id="counselor_fields" class="hidden space-y-6">
+                    <div>
+                        <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
+                        <input type="text" name="specialization" id="specialization"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
                     </div>
+                </div>
 
-                    <div class="group">
-                        <label for="password2" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-lock mr-2"></i>Confirm Password
-                        </label>
-                        <div class="mt-1 relative">
-                            <input type="password" name="password2" id="password2" required
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200"
-                                placeholder="Confirm your password">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-lock text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="group">
-                        <label for="profile_picture" class="block text-sm font-medium text-gray-700 group-hover:text-emerald-600 transition-colors duration-200">
-                            <i class="fas fa-camera mr-2"></i>Profile Picture
-                        </label>
-                        <div class="mt-1 relative">
-                            <input type="file" name="profile_picture" id="profile_picture" accept="image/*"
-                                class="appearance-none block w-full pl-10 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 transition-all duration-200">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-camera text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-4">
-                        <button type="submit"
-                            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transform hover:scale-[1.02] transition-all duration-200">
-                            <i class="fas fa-user-plus mr-2"></i>
-                            Create Account
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <!-- Submit Button -->
+                <div class="flex items-center justify-end space-x-4">
+                    <a href="{% url 'login' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">
+                        Already have an account?
+                    </a>
+                    <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                        Create Account
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
 
-<style>
-    .pattern-dots {
-        background-image: radial-gradient(currentColor 1px, transparent 1px);
-        background-size: calc(10 * 1px) calc(10 * 1px);
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .animate-fadeIn {
-        animation: fadeIn 0.5s ease-out;
-    }
+    <script>
+        document.getElementById('role').addEventListener('change', function() {
+            const studentFields = document.getElementById('student_fields');
+            const counselorFields = document.getElementById('counselor_fields');
+            const yearLevel = document.getElementById('year_level');
+            const course = document.getElementById('course');
+            const specialization = document.getElementById('specialization');
 
-    /* Custom select styling */
-    select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.5rem center;
-        background-repeat: no-repeat;
-        background-size: 1.5em 1.5em;
-        padding-right: 2.5rem;
-    }
-</style>
-
-<script>
-    function toggleRoleFields(role) {
-        const studentFields = document.getElementById('student-fields');
-        if (role === 'Student') {
-            studentFields.style.display = 'block';
-        } else {
-            studentFields.style.display = 'none';
-        }
-    }
-</script>
+            if (this.value === 'student') {
+                studentFields.classList.remove('hidden');
+                counselorFields.classList.add('hidden');
+                yearLevel.required = true;
+                course.required = true;
+                specialization.required = false;
+            } else if (this.value === 'counselor') {
+                studentFields.classList.add('hidden');
+                counselorFields.classList.remove('hidden');
+                yearLevel.required = false;
+                course.required = false;
+                specialization.required = true;
+            } else {
+                studentFields.classList.add('hidden');
+                counselorFields.classList.add('hidden');
+                yearLevel.required = false;
+                course.required = false;
+                specialization.required = false;
+            }
+        });
+    </script>
 {% endblock %}

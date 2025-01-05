@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard{% endblock %}
+{% block navigation %}{% endblock %}
+{% block content %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/student_sidebar.html' %}
+
+    <!-- Main Content Area -->
+        <div class="flex-1 ml-64 overflow-hidden">
+        <!-- Top Navigation -->
+            <nav class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex">
+
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-500">Last login: {{ user.last_login|date:"F j, Y, P" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+        <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+            <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <!-- Total Appointments -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-emerald-100 text-emerald-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Appointments</p>
+                                <p class="text-2xl font-semibold text-gray-900">{{ total_appointments }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Pending Appointments -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending Appointments</p>
+                                <p class="text-2xl font-semibold text-gray-900">{{ pending_appointments }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Total Sessions -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Total Sessions</p>
+                                <p class="text-2xl font-semibold text-gray-900">{{ total_sessions }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Interview Forms -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Interview Forms</p>
+                                <p class="text-2xl font-semibold text-gray-900">{{ total_interview_forms }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Upcoming Appointments -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-medium text-gray-900">Upcoming Appointments</h3>
+                                <a href="{% url 'request_appointment' %}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                    Request Appointment
+                                </a>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            {% if upcoming_appointments %}
+                                <div class="space-y-4">
+                                    {% for appointment in upcoming_appointments %}
+                                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    {% if appointment.counselor.user.profile_picture %}
+                                                        <img class="h-10 w-10 rounded-full" src="{{ appointment.counselor.user.profile_picture.url }}" alt="">
+                                                    {% else %}
+                                                        <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                                            <span class="text-emerald-600 font-medium">{{ appointment.counselor.user.first_name|first }}{{ appointment.counselor.user.last_name|first }}</span>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <p class="text-sm font-medium text-gray-900">{{ appointment.counselor.user.get_full_name }}</p>
+                                                    <p class="text-sm text-gray-500">{{ appointment.date|date:"F j, Y" }} at {{ appointment.time }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                             {% if appointment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                             {% elif appointment.status == 'approved' %}bg-green-100 text-green-800
+                                                             {% else %}bg-red-100 text-red-800{% endif %}">
+                                                    {{ appointment.status|title }}
+                                                </span>
+                                                {% if appointment.status == 'pending' %}
+                                                    <a href="{% url 'cancel_appointment' appointment.id %}" class="ml-4 text-sm text-red-600 hover:text-red-900">Cancel</a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="text-sm text-gray-500">No upcoming appointments</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                <!-- Recent Sessions -->
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-medium text-gray-900">Recent Sessions</h3>
+                                <a href="{% url 'student_session_history' %}" class="text-sm text-emerald-600 hover:text-emerald-900">View all</a>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            {% if recent_sessions %}
+                                <div class="space-y-4">
+                                    {% for session in recent_sessions %}
+                                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    {% if session.counselor.user.profile_picture %}
+                                                        <img class="h-10 w-10 rounded-full" src="{{ session.counselor.user.profile_picture.url }}" alt="">
+                                                    {% else %}
+                                                        <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                                            <span class="text-emerald-600 font-medium">{{ session.counselor.user.first_name|first }}{{ session.counselor.user.last_name|first }}</span>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <p class="text-sm font-medium text-gray-900">{{ session.counselor.user.get_full_name }}</p>
+                                                    <p class="text-sm text-gray-500">{{ session.session_type }} - {{ session.date|date:"F j, Y" }}</p>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                         {% if session.status == 'scheduled' %}bg-yellow-100 text-yellow-800
+                                                         {% elif session.status == 'completed' %}bg-green-100 text-green-800
+                                                         {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ session.status|title }}
+                                            </span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="text-sm text-gray-500">No recent sessions</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Interview Forms Section -->
+                <div class="mt-6">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-medium text-gray-900">Recent Interview Forms</h3>
+                                <a href="{% url 'student_interview_forms' %}" class="text-sm text-emerald-600 hover:text-emerald-900">View all</a>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            {% if recent_interviews %}
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Counselor</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Follow-up</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for interview in recent_interviews %}
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {{ interview.date|date:"F j, Y" }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="flex items-center">
+                                                            <div class="flex-shrink-0 h-8 w-8">
+                                                                {% if interview.counselor.user.profile_picture %}
+                                                                    <img class="h-8 w-8 rounded-full" src="{{ interview.counselor.user.profile_picture.url }}" alt="">
+                                                                {% else %}
+                                                                    <div class="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                                                        <span class="text-emerald-600 font-medium text-xs">{{ interview.counselor.user.first_name|first }}{{ interview.counselor.user.last_name|first }}</span>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <p class="text-sm font-medium text-gray-900">{{ interview.counselor.user.get_full_name }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {{ interview.reason_for_interview|truncatechars:30 }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        {% if interview.follow_up_needed %}
+                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                                Required
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                                Not Required
+                                                            </span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="text-sm text-gray-500">No recent interview forms</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+{% endblock %}

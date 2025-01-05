@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Session History - Student Dashboard{% endblock %}
+{% block navigation %}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/student_sidebar.html' %}
+
+    <!-- Main Content Area -->
+    <div class="flex-1 ml-64 overflow-y-auto">
+        <!-- Top Navigation -->
+        <nav class="bg-white shadow-sm sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex"></div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-500">Last login: {{ user.last_login|date:"F j, Y, P" }}</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Header Section -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Session History</h1>
+                            <p class="mt-1 text-sm text-gray-600">View all your past counseling sessions</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
+                        <div class="bg-emerald-50 overflow-hidden rounded-lg">
+                            <div class="p-5">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt class="text-sm font-medium text-emerald-600 truncate">Total Sessions</dt>
+                                            <dd class="flex items-baseline">
+                                                <div class="text-2xl font-semibold text-emerald-900">{{ sessions.count }}</div>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sessions List -->
+                <div class="bg-white shadow-sm rounded-xl overflow-hidden">
+                    {% if sessions %}
+                        {% for session in sessions %}
+                            <div class="p-6 {% if not forloop.last %}border-b border-gray-200{% endif %} hover:bg-gray-50 transition-colors duration-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-medium text-gray-900">{{ session.session_type }} with {{ session.counselor.user.get_full_name }}</h3>
+                                            <div class="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    {{ session.date }}
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    Duration: {{ session.duration|default:"N/A" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                        {% if session.status == 'completed' %}bg-emerald-100 text-emerald-800
+                                        {% elif session.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ session.status|title }}
+                                    </span>
+                                </div>
+                                {% if session.problem_statement or session.recommendations or session.notes %}
+                                    <div class="mt-4 space-y-4">
+                                        {% if session.problem_statement %}
+                                            <div class="bg-gray-50 rounded-lg p-4">
+                                                <h4 class="text-sm font-medium text-gray-900">Problem Statement</h4>
+                                                <p class="mt-1 text-sm text-gray-600">{{ session.problem_statement }}</p>
+                                            </div>
+                                        {% endif %}
+                                        {% if session.recommendations %}
+                                            <div class="bg-gray-50 rounded-lg p-4">
+                                                <h4 class="text-sm font-medium text-gray-900">Recommendations</h4>
+                                                <p class="mt-1 text-sm text-gray-600">{{ session.recommendations }}</p>
+                                            </div>
+                                        {% endif %}
+                                        {% if session.notes %}
+                                            <div class="bg-gray-50 rounded-lg p-4">
+                                                <h4 class="text-sm font-medium text-gray-900">Session Notes</h4>
+                                                <p class="mt-1 text-sm text-gray-600">{{ session.notes }}</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-12">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No sessions found</h3>
+                            <p class="mt-1 text-sm text-gray-500">You haven't had any counseling sessions yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
