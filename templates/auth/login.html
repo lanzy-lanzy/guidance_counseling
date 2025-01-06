@@ -5,17 +5,24 @@
 {% block navigation %}{% endblock %}
 
 {% block content %}
-    <div class="min-h-screen bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 space-y-8">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0">
+            <img src="{% static 'images/jhcsc_cover.jpg' %}" alt="JHCSC Campus" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/60 to-emerald-700/60"></div>
+            <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'2\' cy=\'2\' r=\'1\' fill=\'white\'/%3E%3Ccircle cx=\'18\' cy=\'18\' r=\'1\' fill=\'white\'/%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'1.5\' fill=\'white\'/%3E%3C/svg%3E'); opacity: 0.15;"></div>
+        </div>
+
+        <div class="max-w-md w-full bg-white/10 backdrop-blur-md rounded-xl shadow-2xl p-8 space-y-8 relative z-10 border border-white/30">
             <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Welcome Back</h2>
-                <p class="text-sm text-gray-600">Sign in to your account to continue</p>
+                <h2 class="text-3xl font-extrabold text-white mb-2">Welcome Back</h2>
+                <p class="text-sm text-white/80">Sign in to your account to continue</p>
             </div>
 
             {% if messages %}
                 <div class="space-y-2">
                     {% for message in messages %}
-                        <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
+                        <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-500/20 text-red-100{% else %}bg-emerald-500/20 text-emerald-100{% endif %} backdrop-blur-sm">
                             <p class="text-sm">{{ message }}</p>
                         </div>
                     {% endfor %}
@@ -28,13 +35,13 @@
                     <div>
                         <label for="username" class="sr-only">Username</label>
                         <input id="username" name="username" type="text" required
-                               class="appearance-none rounded-t-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                               class="appearance-none rounded-t-md relative block w-full px-3 py-3 bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                                placeholder="Username">
                     </div>
                     <div>
                         <label for="password" class="sr-only">Password</label>
                         <input id="password" name="password" type="password" required
-                               class="appearance-none rounded-b-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                               class="appearance-none rounded-b-md relative block w-full px-3 py-3 bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                                placeholder="Password">
                     </div>
                 </div>
@@ -42,14 +49,14 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <input id="remember_me" name="remember_me" type="checkbox"
-                               class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded">
-                        <label for="remember_me" class="ml-2 block text-sm text-gray-900">
+                               class="h-4 w-4 bg-white/20 backdrop-blur-sm text-emerald-600 focus:ring-emerald-500 border-white/30 rounded">
+                        <label for="remember_me" class="ml-2 block text-sm text-white">
                             Remember me
                         </label>
                     </div>
 
                     <div class="text-sm">
-                        <a href="#" class="font-medium text-emerald-600 hover:text-emerald-500">
+                        <a href="#" class="font-medium text-emerald-200 hover:text-emerald-100">
                             Forgot your password?
                         </a>
                     </div>
@@ -57,9 +64,9 @@
 
                 <div>
                     <button type="submit"
-                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600/80 hover:bg-emerald-600 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
                         <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <svg class="h-5 w-5 text-emerald-500 group-hover:text-emerald-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <svg class="h-5 w-5 text-emerald-300 group-hover:text-emerald-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                             </svg>
                         </span>
@@ -71,16 +78,16 @@
             <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
+                        <div class="w-full border-t border-white/30"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Don't have an account?</span>
+                        <span class="px-2 bg-white/10 backdrop-blur-sm text-white/80 rounded-md">Don't have an account?</span>
                     </div>
                 </div>
 
                 <div class="mt-6">
                     <a href="{% url 'register' %}"
-                       class="w-full flex justify-center py-3 px-4 border border-emerald-300 rounded-md shadow-sm text-sm font-medium text-emerald-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                       class="w-full flex justify-center py-3 px-4 border border-white/30 rounded-md shadow-sm text-sm font-medium text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
                         Create new account
                     </a>
                 </div>

@@ -5,129 +5,126 @@
 {% block navigation %}{% endblock %}
 
 {% block content %}
-    <div class="min-h-screen bg-gradient-to-br from-emerald-500 to-emerald-700 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl">
-        <!-- Header Section -->
-            <div class="px-8 py-6 border-b border-gray-200 space-y-2">
-                <h2 class="text-3xl font-extrabold text-gray-900">Create Account</h2>
-                <p class="text-sm text-gray-600">Join our guidance counseling system</p>
+    <div class="min-h-screen bg-gradient-to-br py-12 px-4 sm:px-6 lg:px-8 relative">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0">
+            <img src="{% static 'images/jhcsc_cover.jpg' %}" alt="JHCSC Campus" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/60 to-emerald-700/60"></div>
+            <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'2\' cy=\'2\' r=\'1\' fill=\'white\'/%3E%3Ccircle cx=\'18\' cy=\'18\' r=\'1\' fill=\'white\'/%3E%3Ccircle cx=\'10\' cy=\'10\' r=\'1.5\' fill=\'white\'/%3E%3C/svg%3E'); opacity: 0.15;"></div>
+        </div>
+
+        <div class="max-w-2xl mx-auto bg-white/10 backdrop-blur-md rounded-xl shadow-2xl relative z-10 border border-white/30">
+            <!-- Header Section -->
+            <div class="px-8 py-6 border-b border-white/20 space-y-2">
+                <h2 class="text-3xl font-extrabold text-white">Create Account</h2>
+                <p class="text-sm text-white/80">Join our guidance counseling system</p>
             </div>
 
-        <!-- Messages Section -->
-            {% if messages %}
-                <div class="px-8 py-4 bg-gray-50 border-b border-gray-200">
-                    {% for message in messages %}
-                        <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
-                            <p class="text-sm font-medium">{{ message }}</p>
-                            {% if message.tags == 'success' %}
-                                <p class="text-xs mt-1">Your account is pending approval. We'll notify you once it's approved.</p>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <!-- Messages Section -->
+                {% if messages %}
+                    <div class="px-8 py-4 bg-gray-50 border-b border-gray-200">
+                        {% for message in messages %}
+                            <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-emerald-50 text-emerald-700{% endif %}">
+                                <p class="text-sm font-medium">{{ message }}</p>
+                                {% if message.tags == 'success' %}
+                                    <p class="text-xs mt-1">Your account is pending approval. We'll notify you once it's approved.</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-        <!-- Registration Form -->
+            <!-- Form inputs with glassmorphic style -->
             <form method="POST" class="px-8 py-6 space-y-6">
                 {% csrf_token %}
-
-            <!-- Personal Information -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Form fields with glassmorphic styling -->
                     <div>
-                        <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
-                        <input type="text" name="first_name" id="first_name" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                        <label class="block text-sm font-medium text-white">First Name</label>
+                        <input type="text" name="first_name" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
-
                     <div>
-                        <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-                        <input type="text" name="last_name" id="last_name" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                        <label class="block text-sm font-medium text-white">Last Name</label>
+                        <input type="text" name="last_name" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
-
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" name="email" id="email" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                        <label class="block text-sm font-medium text-white">Email Address</label>
+                        <input type="email" name="email" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
-
                     <div>
-                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                        <input type="tel" name="phone" id="phone" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                        <label class="block text-sm font-medium text-white">Phone Number</label>
+                        <input type="tel" name="phone" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white">Username</label>
+                        <input type="text" name="username" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white">Password</label>
+                        <input type="password" name="password1" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white">Confirm Password</label>
+                        <input type="password" name="password2" required
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
                 </div>
 
-            <!-- Account Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                        <input type="text" name="username" id="username" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-                    </div>
-
-                    <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                        <select name="role" id="role" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-                            <option value="">Select Role</option>
-                            <option value="student">Student</option>
-                            <option value="counselor">Counselor</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="password1" class="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" name="password1" id="password1" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-                    </div>
-
-                    <div>
-                        <label for="password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                        <input type="password" name="password2" id="password2" required
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-                    </div>
+                <!-- Role selection with glassmorphic effect -->
+                <div>
+                    <label class="block text-sm font-medium text-white">Role</label>
+                    <select name="role" id="role" required
+                            class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        <option value="" class="bg-emerald-700">Select Role</option>
+                        <option value="student" class="bg-emerald-700">Student</option>
+                        <option value="counselor" class="bg-emerald-700">Counselor</option>
+                    </select>
                 </div>
 
-            <!-- Student-specific fields (shown/hidden based on role) -->
+                <!-- Student-specific fields (shown/hidden based on role) -->
                 <div id="student_fields" class="hidden space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="year_level" class="block text-sm font-medium text-gray-700">Year Level</label>
+                            <label class="block text-sm font-medium text-white">Year Level</label>
                             <select name="year_level" id="year_level"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-                                <option value="">Select Year Level</option>
-                                <option value="1">First Year</option>
-                                <option value="2">Second Year</option>
-                                <option value="3">Third Year</option>
-                                <option value="4">Fourth Year</option>
+                                    class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                <option value="" class="bg-emerald-700">Select Year Level</option>
+                                <option value="1" class="bg-emerald-700">First Year</option>
+                                <option value="2" class="bg-emerald-700">Second Year</option>
+                                <option value="3" class="bg-emerald-700">Third Year</option>
+                                <option value="4" class="bg-emerald-700">Fourth Year</option>
                             </select>
                         </div>
-
                         <div>
-                            <label for="course" class="block text-sm font-medium text-gray-700">Course</label>
+                            <label class="block text-sm font-medium text-white">Course</label>
                             <input type="text" name="course" id="course"
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                               class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                         </div>
                     </div>
                 </div>
 
-            <!-- Counselor-specific fields (shown/hidden based on role) -->
+                <!-- Counselor-specific fields (shown/hidden based on role) -->
                 <div id="counselor_fields" class="hidden space-y-6">
                     <div>
-                        <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
+                        <label class="block text-sm font-medium text-white">Specialization</label>
                         <input type="text" name="specialization" id="specialization"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                           class="mt-1 block w-full px-3 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-md text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     </div>
                 </div>
 
-            <!-- Submit Button -->
+                <!-- Submit Button -->
                 <div class="flex items-center justify-end space-x-4">
-                    <a href="{% url 'login' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-500">
+                    <a href="{% url 'login' %}" class="text-sm font-medium text-emerald-200 hover:text-emerald-100">
                         Already have an account?
                     </a>
                     <button type="submit"
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600/80 hover:bg-emerald-600 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
                         Create Account
                     </button>
                 </div>
