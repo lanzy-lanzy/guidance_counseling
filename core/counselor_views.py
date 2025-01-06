@@ -32,9 +32,29 @@ def counselor_dashboard(request):
 @user_passes_test(is_counselor)
 def counselor_appointment_list(request):
     counselor = get_object_or_404(Counselor, user=request.user)
-    appointments = Appointment.objects.filter(counselor=counselor).order_by('-date', '-time')
-    return render(request, 'counselor/appointments.html', {'appointments': appointments})
+    appointments = Appointment.objects.filter(counselor=counselor)
 
+    # Get current date for filtering upcoming appointments
+    current_date = timezone.now().date()
+    
+    # Filter upcoming appointments
+    if request.GET.get('status') == 'approved':
+        appointments = appointments.filter(
+            status='approved',
+            date__gte=current_date
+        ).order_by('date', 'time')
+
+    context = {
+        'appointments': appointments,
+        'today_appointments': appointments.filter(date=current_date).count(),
+        'pending_appointments': appointments.filter(status='pending').count(),
+        'upcoming_appointments': appointments.filter(
+            status='approved', 
+            date__gte=current_date
+        ).count(),
+    }
+
+    return render(request, 'counselor/appointments.html', context)
 @login_required
 @user_passes_test(is_counselor)
 def counselor_student_list(request):
@@ -224,3 +244,40 @@ def view_interview(request, interview_id):
         'view_only': True
     }
     return render(request, 'counselor/interview_form.html', context)
+
+@login_required
+def counselor_profile(request):
+    counselor = get_object_or_404(Counselor, user=request.user)
+    
+    if request.method == 'POST':
+        # Handle profile picture upload
+        if 'profile_picture' in request.FILES:
+            request.user.profile_picture = request.FILES['profile_picture']
+        
+        # Update user information
+        request.user.first_name = request.POST.get('first_name')
+        request.user.last_name = request.POST.get('last_name')
+        request.user.email = request.POST.get('email')
+        request.user.phone_number = request.POST.get('phone_number')
+        request.user.save()
+        
+        # Update counselor information
+        counselor.specialization = request.POST.get('specialization')
+        counselor.bio = request.POST.get('bio')
+        counselor.save()
+        
+        # Handle password change
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        if current_password and new_password:
+            if request.user.check_password(current_password):
+                request.user.set_password(new_password)
+                request.user.save()
+                messages.success(request, 'Password updated successfully.')
+            else:
+                messages.error(request, 'Current password is incorrect.')
+        
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('counselor_profile')
+    
+    return render(request, 'counselor/profile.html', {'counselor': counselor})

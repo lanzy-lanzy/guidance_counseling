@@ -1371,3 +1371,6 @@ def generate_custom_report(request):
     
     messages.success(request, "Custom report generated successfully.")
     return redirect('view_report', report_id=report.id)
+def view_interview(request, interview_id):
+    interview = get_object_or_404(Interview, id=interview_id)
+    return render(request, 'counselor/view_interview.html', {'interview': interview})

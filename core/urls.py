@@ -32,7 +32,10 @@ urlpatterns = [
     path('counselor/sessions/<int:session_id>/end/', counselor_views.end_session, name='end_session'),
     path('counselor/student/<int:student_id>/', counselor_views.student_profile, name='student_profile'),
     path('counselor/student/<int:student_id>/create-interview/', counselor_views.create_interview, name='create_interview'),
+    path('counselor/profile/', counselor_views.counselor_profile, name='counselor_profile'),
+
     path('interview/<int:interview_id>/', counselor_views.interview_form, name='interview_form'),
+    path('interview/<int:interview_id>/', views.view_interview, name='view_interview'),
 
     # Admin URLs
     path('admin-panel/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
