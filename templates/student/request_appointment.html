@@ -2,7 +2,10 @@
 {% load static %}
 
 {% block title %}Request Appointment{% endblock %}
-{% block navigation %}{% endblock %}
+{% block navigation %}
+    {% include 'includes/student_top_nav.html' %}
+{% endblock %}
+
 
 {% block content %}
 <div class="flex h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 relative">

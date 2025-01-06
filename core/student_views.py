@@ -117,3 +117,40 @@ def cancel_appointment(request, appointment_id):
         messages.error(request, 'Cannot cancel this appointment.')
     
     return redirect('student_appointment_list')
+
+@login_required
+def student_profile(request):
+    student = get_object_or_404(Student, user=request.user)
+    
+    if request.method == 'POST':
+        # Handle profile picture upload
+        if 'profile_picture' in request.FILES:
+            request.user.profile_picture = request.FILES['profile_picture']
+        
+        # Update user information
+        request.user.first_name = request.POST.get('first_name')
+        request.user.last_name = request.POST.get('last_name')
+        request.user.email = request.POST.get('email')
+        request.user.save()
+        
+        # Update student information
+        student.course = request.POST.get('course')
+        student.year = request.POST.get('year')
+        student.contact_number = request.POST.get('contact_number')
+        student.save()
+        
+        # Handle password change
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        if current_password and new_password:
+            if request.user.check_password(current_password):
+                request.user.set_password(new_password)
+                request.user.save()
+                messages.success(request, 'Password updated successfully.')
+            else:
+                messages.error(request, 'Current password is incorrect.')
+        
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('student_profile')
+    
+    return render(request, 'student/profile.html', {'student': student})

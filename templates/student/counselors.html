@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Available Counselors{% endblock %}
+
+{% block navigation %}
+    {% include 'includes/student_top_nav.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-50">
+    {% include 'includes/student_sidebar.html' %}
+    
+    <div class="flex-1 ml-64 pt-8">
+        <div class="p-8">
+            <!-- Header Section -->
+            <div class="mb-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h1 class="text-2xl font-bold text-gray-900">Available Counselors</h1>
+                <p class="mt-1 text-gray-600">Connect with our professional counselors for guidance and support</p>
+            </div>
+
+            <!-- Counselors Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for counselor in counselors %}
+                    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300">
+                        <div class="relative h-48 bg-gradient-to-br from-blue-500 to-blue-600">
+                            <div class="absolute inset-0 bg-black/10"></div>
+                            <!-- Counselor Image -->
+                            <img class="w-24 h-24 rounded-full border-4 border-white absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 object-cover"
+                                 src="{% if counselor.user.profile_picture %}{{ counselor.user.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}"
+                                 alt="{{ counselor.user.get_full_name }}">
+                        </div>
+                        
+                        <div class="pt-16 pb-6 px-6 text-center">
+                            <h3 class="text-xl font-semibold text-gray-900">{{ counselor.user.get_full_name }}</h3>
+                            <p class="text-blue-600 text-sm font-medium mt-1">{{ counselor.specialization }}</p>
+                            
+                            <div class="mt-4 space-y-2">
+                                <div class="flex items-center justify-center text-sm text-gray-600">
+                                    <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    {{ counselor.office_location }}
+                                </div>
+                                <div class="flex items-center justify-center text-sm text-gray-600">
+                                    <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Available: Mon-Fri, 9AM-5PM
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex justify-center space-x-3">
+                                <a href="{% url 'request_appointment' %}?counselor={{ counselor.id }}" 
+                                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Schedule Appointment
+                                </a>
+                                <button onclick="viewProfile('{{ counselor.id }}')" 
+                                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    View Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-span-full flex flex-col items-center justify-center bg-white rounded-xl shadow-sm p-8">
+                        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <h3 class="mt-4 text-lg font-medium text-gray-900">No Counselors Available</h3>
+                        <p class="mt-1 text-gray-500">Please check back later for available counselors.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewProfile(counselorId) {
+    // Implement profile view functionality
+    window.location.href = `/student/counselor/${counselorId}/profile/`;
+}
+</script>
+{% endblock %}
