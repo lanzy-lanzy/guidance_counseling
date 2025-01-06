@@ -1374,3 +1374,62 @@ def generate_custom_report(request):
 def view_interview(request, interview_id):
     interview = get_object_or_404(Interview, id=interview_id)
     return render(request, 'counselor/view_interview.html', {'interview': interview})
+
+
+def counselor_profile(request, counselor_id):
+    counselor = get_object_or_404(Counselor, id=counselor_id)
+    return render(request, 'student/counselor_profile.html', {
+        'counselor': counselor
+    })
+
+
+from django.db.models import Count, Avg
+from django.utils import timezone
+from datetime import timedelta
+
+def counselor_reports(request):
+    # Get current counselor's data
+    counselor = request.user.counselor
+    today = timezone.now()
+    thirty_days_ago = today - timedelta(days=30)
+
+    # Calculate real statistics
+    total_sessions = Appointment.objects.filter(counselor=counselor).count()
+    active_students = Appointment.objects.filter(counselor=counselor).values('student').distinct().count()
+    completed_sessions = Appointment.objects.filter(counselor=counselor, status='Completed').count()
+    completion_rate = int((completed_sessions / total_sessions * 100) if total_sessions > 0 else 0)
+    
+    # Monthly sessions data for chart
+    monthly_sessions = (
+        Appointment.objects.filter(counselor=counselor)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Session types distribution
+    session_types = (
+        Appointment.objects.filter(counselor=counselor)
+        .values('purpose')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+
+    # Recent sessions
+    recent_sessions = (
+        Appointment.objects.filter(counselor=counselor)
+        .select_related('student__user')
+        .order_by('-date')[:10]
+    )
+
+    context = {
+        'total_sessions': total_sessions,
+        'active_students': active_students,
+        'completion_rate': completion_rate,
+        'monthly_sessions': list(monthly_sessions),
+        'session_types': list(session_types),
+        'recent_sessions': recent_sessions,
+    }
+
+    return render(request, 'counselor/reports.html', context)

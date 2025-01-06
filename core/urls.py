@@ -19,6 +19,7 @@ urlpatterns = [
     path('student/appointments/request/', student_views.request_appointment, name='request_appointment'),
     path('student/appointments/<int:appointment_id>/cancel/', student_views.cancel_appointment, name='cancel_appointment'),
     path('student/profile/', student_views.student_profile, name='student_profile'),
+    path('student/counselor/<int:counselor_id>/profile/', views.counselor_profile, name='counselor_profile'),
 
     # Counselor URLs
     # path('counselor/appointments/', counselor_views.appointments, name='counselor_appointments'),

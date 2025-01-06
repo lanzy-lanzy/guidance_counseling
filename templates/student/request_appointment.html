@@ -37,11 +37,12 @@
                                         class="mt-1 block w-full pl-3 pr-10 py-4 text-base border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 rounded-lg transition-all duration-200 hover:border-emerald-400">
                                     <option value="">Choose a counselor</option>
                                     {% for counselor in counselors %}
-                                        <option value="{{ counselor.id }}">{{ counselor.user.get_full_name }}</option>
+                                        <option value="{{ counselor.id }}" {% if request.GET.counselor|stringformat:"s" == counselor.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ counselor.user.get_full_name|title }}
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </div>
-
                             <!-- Date and Time Selection Cards -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="bg-emerald-50/50 p-6 rounded-xl border border-emerald-100">
