@@ -89,7 +89,7 @@ class GuidanceSession(models.Model):
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
-
+    
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="sessions")
     counselor = models.ForeignKey(Counselor, on_delete=models.CASCADE, related_name="sessions")
     session_type = models.CharField(max_length=20, choices=SESSION_TYPE_CHOICES)
@@ -172,6 +172,7 @@ class FollowUp(models.Model):
         return f"Follow-Up for {self.session.student.user.username} ({status})"
 
 class Interview(models.Model):
+    session = models.OneToOneField(GuidanceSession, on_delete=models.CASCADE, related_name='interview')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='interview_forms')
     counselor = models.ForeignKey(Counselor, on_delete=models.CASCADE, related_name='conducted_interviews')
     date = models.DateField(auto_now_add=True)

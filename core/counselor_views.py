@@ -85,25 +85,41 @@ def start_session(request, appointment_id):
     counselor = get_object_or_404(Counselor, user=request.user)
     appointment = get_object_or_404(Appointment, id=appointment_id, counselor=counselor, status='approved')
     
-    # Create a new guidance session
     session = GuidanceSession.objects.create(
         student=appointment.student,
         counselor=counselor,
-        session_type='Interview',  # Default type, can be modified later
+        session_type='Interview',
         status='scheduled',
         appointment=appointment
     )
     
-    # Start the session using the model's method
     session.start_session()
-    
-    # Update appointment status
     appointment.status = 'completed'
     appointment.save()
     
-    messages.success(request, 'Session started successfully.')
-    return redirect('counselor_session_history')
-
+    # Create interview with default/placeholder values for required fields
+    interview = Interview.objects.create(
+        student=appointment.student,
+        counselor=counselor,
+        session=session,
+        address="To be updated",
+        contact_number="To be updated",
+        birth_date=appointment.student.user.date_joined.date(),  # Temporary default
+        birth_place="To be updated",
+        age=0,  # Will be updated in form
+        civil_status="Single",  # Default value
+        religion="To be updated",
+        parents_marital_status="To be updated",
+        elementary_school="To be updated",
+        elementary_year_graduated="To be updated",
+        high_school="To be updated",
+        high_school_year_graduated="To be updated",
+        reason_for_interview="To be updated",
+        presenting_problem="To be updated",
+        background_of_problem="To be updated"
+    )
+    
+    return redirect('interview_form', interview_id=interview.id)
 @login_required
 @user_passes_test(is_counselor)
 def end_session(request, session_id):
@@ -166,3 +182,45 @@ def create_interview(request, student_id):
     return render(request, 'counselor/create_interview.html', {
         'student': student
     })
+
+def interview_form(request, interview_id):
+    interview = get_object_or_404(Interview, id=interview_id)
+    session = interview.session
+    
+    if request.method == 'POST':
+        # Update interview details
+        interview.time_started = request.POST.get('time_started')
+        interview.time_ended = request.POST.get('time_ended')
+        interview.reason_for_interview = request.POST.get('interview_reason')
+        interview.presenting_problem = request.POST.get('problem_statement')
+        interview.counselor_notes = request.POST.get('interview_notes')
+        interview.recommendations = request.POST.get('recommendation')
+        interview.save()
+        
+        # End the guidance session
+        session.end_session(
+            problem_statement=request.POST.get('problem_statement'),
+            recommendations=request.POST.get('recommendation'),
+            notes=request.POST.get('interview_notes')
+        )
+        
+        messages.success(request, 'Interview form saved and session completed successfully.')
+        return redirect('counselor_session_history')
+        
+    context = {
+        'interview': interview,
+        'student': interview.student,
+        'session': session,
+        'view_only': False
+    }
+    return render(request, 'counselor/interview_form.html', context)
+
+def view_interview(request, interview_id):
+    interview = get_object_or_404(Interview, id=interview_id)
+    context = {
+        'interview': interview,
+        'student': interview.student,
+        'session': interview.session,
+        'view_only': True
+    }
+    return render(request, 'counselor/interview_form.html', context)

@@ -8,7 +8,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),  # Keep this as a fallback
-    
+    path('schedule-session/', views.schedule_session, name='schedule_session'),
+   
     # Student URLs
     path('student/dashboard/', student_views.student_dashboard, name='student_dashboard'),
     path('student/appointments/', student_views.student_appointment_list, name='student_appointment_list'),
@@ -19,6 +20,7 @@ urlpatterns = [
     path('student/appointments/<int:appointment_id>/cancel/', student_views.cancel_appointment, name='cancel_appointment'),
     
     # Counselor URLs
+    # path('counselor/appointments/', counselor_views.appointments, name='counselor_appointments'),
     path('counselor/dashboard/', counselor_views.counselor_dashboard, name='counselor_dashboard'),
     path('counselor/appointments/', counselor_views.counselor_appointment_list, name='counselor_appointment_list'),
     path('counselor/students/', counselor_views.counselor_student_list, name='counselor_student_list'),
@@ -30,6 +32,7 @@ urlpatterns = [
     path('counselor/sessions/<int:session_id>/end/', counselor_views.end_session, name='end_session'),
     path('counselor/student/<int:student_id>/', counselor_views.student_profile, name='student_profile'),
     path('counselor/student/<int:student_id>/create-interview/', counselor_views.create_interview, name='create_interview'),
+    path('interview/<int:interview_id>/', counselor_views.interview_form, name='interview_form'),
 
     # Admin URLs
     path('admin-panel/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),

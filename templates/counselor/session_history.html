@@ -210,6 +210,11 @@
                                                 </svg>
                                                 View Student Profile
                                             </a>
+                                            {% if session.interview %}
+                                                <a href="{% url 'view_interview' session.interview.id %}" class="btn btn-info">
+                                                    View Interview Form
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
