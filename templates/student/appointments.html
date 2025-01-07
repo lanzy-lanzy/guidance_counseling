@@ -2,10 +2,7 @@
 {% load static %}
 
 {% block title %}My Appointments - Student Dashboard{% endblock %}
-{% block navigation %}
-    {% include 'includes/student_top_nav.html' %}
-{% endblock %}
-
+{% block navigation %}{% endblock %}
 
 {% block content %}
     <div class="flex h-screen bg-gray-100">
@@ -13,6 +10,19 @@
 
     <!-- Main Content Area -->
         <div class="flex-1 ml-64 overflow-hidden">
+        <!-- Top Navigation -->
+            <nav class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex">
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-500">Last login: {{ user.last_login|date:"F j, Y, P" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
         <!-- Main Content -->
             <main class="flex-1 overflow-y-auto p-6">
                 <div class="min-h-screen flex">
@@ -235,97 +245,81 @@
                         </div>
 
                     <!-- New Appointment Modal -->
-                    <div id="newAppointmentModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            <!-- Backdrop with blur effect -->
-                            <div class="fixed inset-0 bg-gray-500 bg-opacity-60 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
-                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                            
-                            <!-- Modal Panel -->
-                            <div class="inline-block align-bottom bg-gradient-to-br from-white to-emerald-50 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl w-full relative">
-                                <!-- Decorative Pattern -->
-                                <div class="absolute inset-0 z-0 opacity-[0.03]" style="background-image: url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23047857' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
-                                </div>
-                    
-                                <div class="relative z-10 px-8 pt-8 pb-10">
-                                    <form id="newAppointmentForm" method="POST" action="{% url 'request_appointment' %}" class="space-y-6">
+                        <div id="newAppointmentModal" class="fixed inset-0 z-10 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                                <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                                    <form id="newAppointmentForm" method="POST" action="{% url 'request_appointment' %}">
                                         {% csrf_token %}
-                                        
-                                        <!-- Header with Icon -->
-                                        <div class="text-center mb-6">
-                                            <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-emerald-100 mb-4">
-                                                <svg class="h-8 w-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div>
+                                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
+                                                <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                 </svg>
                                             </div>
-                                            <h3 class="text-2xl font-bold text-emerald-900" id="modal-title">Schedule Appointment</h3>
-                                            <p class="mt-2 text-sm text-emerald-600">Fill in the details for your counseling session</p>
+                                            <div class="mt-3 text-center sm:mt-5">
+                                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                                    Schedule New Appointment
+                                                </h3>
+                                                <div class="mt-2">
+                                                    <p class="text-sm text-gray-500">
+                                                        Please fill in the details below to schedule your counseling session.
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                    
-                                        <!-- Form Fields -->
-                                        <div class="space-y-6">
-                                            <!-- Counselor Selection -->
-                                            <div class="bg-white/60 p-5 rounded-xl border border-emerald-100 shadow-sm">
-                                                <label for="counselor" class="block text-sm font-semibold text-emerald-900 mb-2">Select Counselor</label>
+                                        <div class="mt-5 sm:mt-6 space-y-4">
+                                            <div>
+                                                <label for="counselor" class="block text-sm font-medium text-gray-700">Counselor</label>
                                                 <select name="counselor" id="counselor" required
-                                                        class="mt-1 block w-full pl-3 pr-10 py-3 text-base border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-emerald-300">
-                                                    <option value="">Choose a counselor</option>
+                                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                                                    <option value="">Select a counselor</option>
                                                     {% for counselor in counselors %}
-                                                        <option value="{{ counselor.id }}">{{ counselor.user.get_full_name|title }}</option>
+                                                        <option value="{{ counselor.id }}">{{ counselor.user.get_full_name }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
-                    
-                                            <!-- Date and Time Grid -->
-                                            <div class="grid grid-cols-2 gap-4">
-                                                <div class="bg-white/60 p-5 rounded-xl border border-emerald-100 shadow-sm">
-                                                    <label for="date" class="block text-sm font-semibold text-emerald-900 mb-2">Date</label>
-                                                    <input type="date" name="date" id="date" required
-                                                           class="mt-1 block w-full border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 py-3 transition-all duration-200 hover:border-emerald-300">
-                                                </div>
-                    
-                                                <div class="bg-white/60 p-5 rounded-xl border border-emerald-100 shadow-sm">
-                                                    <label for="time" class="block text-sm font-semibold text-emerald-900 mb-2">Time</label>
-                                                    <select name="time" id="time" required
-                                                            class="mt-1 block w-full pl-3 pr-10 py-3 text-base border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-emerald-300">
-                                                        <option value="">Select time</option>
-                                                        <option value="09:00">9:00 AM</option>
-                                                        <option value="10:00">10:00 AM</option>
-                                                        <option value="11:00">11:00 AM</option>
-                                                        <option value="13:00">1:00 PM</option>
-                                                        <option value="14:00">2:00 PM</option>
-                                                        <option value="15:00">3:00 PM</option>
-                                                        <option value="16:00">4:00 PM</option>
-                                                    </select>
-                                                </div>
+                                            <div>
+                                                <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                                                <input type="date" name="date" id="date" required
+                                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
                                             </div>
-                    
-                                            <!-- Purpose Field -->
-                                            <div class="bg-white/60 p-5 rounded-xl border border-emerald-100 shadow-sm">
-                                                <label for="purpose" class="block text-sm font-semibold text-emerald-900 mb-2">Purpose</label>
+                                            <div>
+                                                <label for="time" class="block text-sm font-medium text-gray-700">Time</label>
+                                                <select name="time" id="time" required
+                                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
+                                                    <option value="">Select a time</option>
+                                                    <option value="09:00">9:00 AM</option>
+                                                    <option value="10:00">10:00 AM</option>
+                                                    <option value="11:00">11:00 AM</option>
+                                                    <option value="13:00">1:00 PM</option>
+                                                    <option value="14:00">2:00 PM</option>
+                                                    <option value="15:00">3:00 PM</option>
+                                                    <option value="16:00">4:00 PM</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="purpose" class="block text-sm font-medium text-gray-700">Purpose</label>
                                                 <textarea name="purpose" id="purpose" rows="3" required
-                                                          class="mt-1 block w-full border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 hover:border-emerald-300"
+                                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
                                                           placeholder="Briefly describe the reason for your appointment"></textarea>
                                             </div>
-                                        </div>
-                    
-                                        <!-- Action Buttons -->
-                                        <div class="flex justify-end space-x-3 pt-6">
-                                            <button type="button" onclick="closeNewAppointmentModal()"
-                                                    class="inline-flex items-center px-5 py-2.5 border border-emerald-300 rounded-lg text-sm font-medium text-emerald-700 bg-white hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
-                                                Cancel
-                                            </button>
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
-                                                Schedule Appointment
-                                            </button>
+                                            <div class="mt-5 sm:mt-6 flex space-x-3">
+                                                <button type="button" onclick="closeNewAppointmentModal()"
+                                                        class="flex-1 justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit"
+                                                        class="flex-1 justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                                    Schedule
+                                                </button>
+                                            </div>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
 
                         <script>
                             function openNewAppointmentModal() {
@@ -373,5 +367,3 @@
     </div>
 {% endblock %}
 
-{% block extra_js %}
-{% endblock %}

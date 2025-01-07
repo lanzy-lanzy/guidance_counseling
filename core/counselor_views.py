@@ -32,7 +32,7 @@ def counselor_dashboard(request):
 @user_passes_test(is_counselor)
 def counselor_appointment_list(request):
     counselor = get_object_or_404(Counselor, user=request.user)
-    appointments = Appointment.objects.filter(counselor=counselor)
+    appointments = Appointment.objects.all().order_by('-date', '-time')
 
     # Get current date for filtering upcoming appointments
     current_date = timezone.now().date()

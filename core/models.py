@@ -160,7 +160,14 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"Appointment for {self.student.user.username} with {self.counselor.user.username}"
-
+    
+    def check_conflicts(self):
+        return Appointment.objects.filter(
+            counselor=self.counselor,
+            date=self.date,
+            time=self.time,
+            status__in=['pending', 'approved']
+        ).exists()
 class FollowUp(models.Model):
     session = models.OneToOneField(GuidanceSession, on_delete=models.CASCADE, related_name="followup")
     followup_date = models.DateField()
