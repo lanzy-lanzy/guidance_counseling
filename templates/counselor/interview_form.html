@@ -43,141 +43,183 @@
                         <p class="text-gray-600">(Student/Parent/Guardian)</p>
                     </div>
 
-                    <form method="post" id="interviewForm" class="space-y-6">
-                        {% csrf_token %}
-
-                    <!-- Date -->
-                        <div class="flex justify-end">
-                            <div class="w-48">
-                                <label class="block text-sm font-medium text-gray-700">Date</label>
-                                <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="date" value="{% now 'Y-m-d' %}" {% if view_only %}readonly{% endif %}>
-                            </div>
-                        </div>
-
-                    <!-- Basic Information -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Basic Information</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Name of Student</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ student.user.get_full_name }}" readonly>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Course/Year</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ student.course }} - Year {{ student.year }}" readonly>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Name of Parent/Guardian</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="parent_guardian_name" {% if view_only %}readonly{% endif %}>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Contact No.</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="contact_number" {% if view_only %}readonly{% endif %}>
-                                </div>
-                            </div>
-                        </div>
-
-                    <!-- Interview Details -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Interview Details</h3>
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Interview</label>
-                                    <div class="space-x-4">
-                                        <label class="inline-flex items-center">
-                                            <input type="radio" class="form-radio text-emerald-600" name="interview_reason" value="called_in" {% if view_only %}disabled{% endif %}>
-                                            <span class="ml-2">Called in</span>
-                                        </label>
-                                        <label class="inline-flex items-center">
-                                            <input type="radio" class="form-radio text-emerald-600" name="interview_reason" value="voluntary" {% if view_only %}disabled{% endif %}>
-                                            <span class="ml-2">Voluntary</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Referred by</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="referred_by" {% if view_only %}readonly{% endif %}>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Contact Number</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="referrer_contact" {% if view_only %}readonly{% endif %}>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Time Started</label>
-                                    <input type="time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="time_started" {% if view_only %}readonly{% endif %}>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Time Ended</label>
-                                    <input type="time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="time_ended" {% if view_only %}readonly{% endif %}>
-                                </div>
-                            </div>
-                        </div>
-
-                    <!-- Problem Statement -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Problem Statement</h3>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Problem Statement/Description</label>
-                                <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="problem_statement" rows="4" {% if view_only %}readonly{% endif %}></textarea>
-                            </div>
-                        </div>
-
-                    <!-- Interview -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Interview Notes</h3>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Interview</label>
-                                <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="interview_notes" rows="6" {% if view_only %}readonly{% endif %}></textarea>
-                            </div>
-                        </div>
-
-                    <!-- Recommendation -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Recommendation</h3>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Recommendation</label>
-                                <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="recommendation" rows="4" {% if view_only %}readonly{% endif %}></textarea>
-                            </div>
-                        </div>
-
-                    <!-- Signatures -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Signatures</h3>
-                            <div class="grid grid-cols-2 gap-8">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Interviewed by:</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ request.user.get_full_name }}" readonly>
-                                    <div class="text-center mt-1">
-                                        <small class="text-gray-500">Guidance Counselor</small>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Conforme:</label>
-                                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="student_signature" {% if view_only %}readonly{% endif %}>
-                                    <div class="text-center mt-1">
-                                        <small class="text-gray-500">Signature over Printed Name</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {% if not view_only %}
-                            <div class="flex justify-end space-x-3 print:hidden">
-                                <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" onclick="window.print()">
-                                    <i class="fas fa-print mr-2"></i> Print
-                                </button>
-                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                                    <i class="fas fa-save mr-2"></i> Save Form
-                                </button>
-                            </div>
-                        {% endif %}
-                    </form>
+            
+                                        <form method="post" id="interviewForm" class="space-y-6">
+                                            {% csrf_token %}
+                    
+                                            <!-- Date -->
+                                            <div class="flex justify-end">
+                                                <div class="w-48">
+                                                    <label class="block text-sm font-medium text-gray-700">Date</label>
+                                                    <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="date" value="{{ interview.date|date:'Y-m-d' }}" {% if view_only %}readonly{% endif %}>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Personal Information -->
+                                            <div class="space-y-4">
+                                                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Personal Information</h3>
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Name of Student</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ student.user.get_full_name }}" readonly>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Course/Year</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm" value="{{ student.course }} - Year {{ student.year }}" readonly>
+                                                    </div>
+                                                </div>
+                    
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Address</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="address" value="{{ interview.address }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="contact_number" value="{{ interview.contact_number }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                    
+                                                <div class="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Birth Date</label>
+                                                        <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="birth_date" value="{{ interview.birth_date|date:'Y-m-d' }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Birth Place</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="birth_place" value="{{ interview.birth_place }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Age</label>
+                                                        <input type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="age" value="{{ interview.age }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                    
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Civil Status</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="civil_status" value="{{ interview.civil_status }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Religion</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="religion" value="{{ interview.religion }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Family Background -->
+                                            <div class="space-y-4">
+                                                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Family Background</h3>
+                                                <div class="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Father's Name</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="father_name" value="{{ interview.father_name }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Father's Occupation</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="father_occupation" value="{{ interview.father_occupation }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Father's Education</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="father_education" value="{{ interview.father_education }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                    
+                                                <div class="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Mother's Name</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="mother_name" value="{{ interview.mother_name }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Mother's Occupation</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="mother_occupation" value="{{ interview.mother_occupation }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Mother's Education</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="mother_education" value="{{ interview.mother_education }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                    
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Parents' Marital Status</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="parents_marital_status" value="{{ interview.parents_marital_status }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Educational Background -->
+                                            <div class="space-y-4">
+                                                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Educational Background</h3>
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Elementary School</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="elementary_school" value="{{ interview.elementary_school }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Year Graduated</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="elementary_year_graduated" value="{{ interview.elementary_year_graduated }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                    
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">High School</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="high_school" value="{{ interview.high_school }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Year Graduated</label>
+                                                        <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="high_school_year_graduated" value="{{ interview.high_school_year_graduated }}" {% if view_only %}readonly{% endif %}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Interview Details -->
+                                            <div class="space-y-4">
+                                                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Interview Details</h3>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Reason for Interview</label>
+                                                    <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="reason_for_interview" rows="3" {% if view_only %}readonly{% endif %}>{{ interview.reason_for_interview }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Presenting Problem</label>
+                                                    <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="presenting_problem" rows="4" {% if view_only %}readonly{% endif %}>{{ interview.presenting_problem }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Background of Problem</label>
+                                                    <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="background_of_problem" rows="4" {% if view_only %}readonly{% endif %}>{{ interview.background_of_problem }}</textarea>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Counselor's Notes and Recommendations -->
+                                            <div class="space-y-4">
+                                                <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Counselor's Notes and Recommendations</h3>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Counselor's Notes</label>
+                                                    <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="counselor_notes" rows="4" {% if view_only %}readonly{% endif %}>{{ interview.counselor_notes }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700">Recommendations</label>
+                                                    <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="recommendations" rows="4" {% if view_only %}readonly{% endif %}>{{ interview.recommendations }}</textarea>
+                                                </div>
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" class="rounded border-gray-300 text-emerald-600 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" name="follow_up_needed" {% if interview.follow_up_needed %}checked{% endif %} {% if view_only %}disabled{% endif %}>
+                                                    <label class="ml-2 block text-sm text-gray-900">Follow-up Session Needed</label>
+                                                </div>
+                                            </div>
+                    
+                                            {% if not view_only %}
+                                            <div class="flex justify-end space-x-4 pt-4">
+                                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                                    Save Interview Form
+                                                </button>
+                                                <button type="button" onclick="window.print()" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                                    Print Form
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                        </form>
+            
                 </div>
             </div>
         </div>

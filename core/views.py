@@ -1433,3 +1433,18 @@ def counselor_reports(request):
     }
 
     return render(request, 'counselor/reports.html', context)
+
+
+def view_completed_interview(request, session_id):
+    session = get_object_or_404(GuidanceSession, id=session_id)
+    interview = get_object_or_404(Interview, session=session)
+    
+    context = {
+        'session': session,
+        'interview': interview,
+        'student': session.student,
+        'counselor': session.counselor,
+        'view_only': True,  # This enables print-only view
+    }
+    
+    return render(request, 'counselor/completed_interview_view.html', context)

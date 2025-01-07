@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
-from .models import Appointment, Student, GuidanceSession, Interview, Counselor
+from .models import Appointment, Student, GuidanceSession, Interview, Counselor, FollowUp
 from django.utils import timezone
 
 def is_counselor(user):
@@ -55,6 +55,7 @@ def counselor_appointment_list(request):
     }
 
     return render(request, 'counselor/appointments.html', context)
+
 @login_required
 @user_passes_test(is_counselor)
 def counselor_student_list(request):
@@ -105,60 +106,140 @@ def start_session(request, appointment_id):
     counselor = get_object_or_404(Counselor, user=request.user)
     appointment = get_object_or_404(Appointment, id=appointment_id, counselor=counselor, status='approved')
     
+    # Create a new guidance session
     session = GuidanceSession.objects.create(
         student=appointment.student,
         counselor=counselor,
         session_type='Interview',
-        status='scheduled',
-        appointment=appointment
+        status='in_progress',
+        appointment=appointment,
+        date=timezone.now().date(),
+        time_started=timezone.now()
     )
     
-    session.start_session()
+    # Create interview with default values
+    interview = Interview.objects.create(
+        session=session,
+        student=appointment.student,
+        counselor=counselor,
+        date=timezone.now().date(),
+        address="",
+        contact_number="",
+        birth_date=appointment.student.user.date_joined.date(),  # Temporary default
+        birth_place="",
+        age=0,  # Will be updated in form
+        civil_status="Single",  # Default value
+        religion="",
+        parents_marital_status="",
+        elementary_school="",
+        elementary_year_graduated="",
+        high_school="",
+        high_school_year_graduated="",
+        reason_for_interview=appointment.purpose,
+        presenting_problem="",
+        background_of_problem=""
+    )
+    
+    # Update appointment status
     appointment.status = 'completed'
     appointment.save()
     
-    # Create interview with default/placeholder values for required fields
-    interview = Interview.objects.create(
-        student=appointment.student,
-        counselor=counselor,
-        session=session,
-        address="To be updated",
-        contact_number="To be updated",
-        birth_date=appointment.student.user.date_joined.date(),  # Temporary default
-        birth_place="To be updated",
-        age=0,  # Will be updated in form
-        civil_status="Single",  # Default value
-        religion="To be updated",
-        parents_marital_status="To be updated",
-        elementary_school="To be updated",
-        elementary_year_graduated="To be updated",
-        high_school="To be updated",
-        high_school_year_graduated="To be updated",
-        reason_for_interview="To be updated",
-        presenting_problem="To be updated",
-        background_of_problem="To be updated"
-    )
-    
+    messages.success(request, 'Session started successfully.')
     return redirect('interview_form', interview_id=interview.id)
+
 @login_required
 @user_passes_test(is_counselor)
-def end_session(request, session_id):
+def interview_form(request, interview_id):
     counselor = get_object_or_404(Counselor, user=request.user)
-    session = get_object_or_404(GuidanceSession, id=session_id, counselor=counselor, status='in_progress')
+    interview = get_object_or_404(Interview, id=interview_id, counselor=counselor)
+    session = interview.session
+
+    # Prevent accessing completed interviews in edit mode
+    if session.status == 'completed':
+        return redirect('view_interview', interview_id=interview.id)
     
     if request.method == 'POST':
-        # End the session with the provided details
-        session.end_session(
-            problem_statement=request.POST.get('problem_statement'),
-            recommendations=request.POST.get('recommendations'),
-            notes=request.POST.get('notes'),
-            action_items=request.POST.get('action_items'),
-            next_steps=request.POST.get('next_steps')
-        )
-        messages.success(request, 'Session ended successfully.')
-        return redirect('counselor_session_history')
+        try:
+            # Prevent duplicate submissions
+            if session.status == 'completed':
+                messages.warning(request, 'This interview has already been completed.')
+                return redirect('view_interview', interview_id=interview.id)
+
+            # Update interview details
+            interview.address = request.POST.get('address', '')
+            interview.contact_number = request.POST.get('contact_number', '')
+            interview.birth_date = request.POST.get('birth_date')
+            interview.birth_place = request.POST.get('birth_place', '')
+            interview.age = int(request.POST.get('age', 0))
+            interview.civil_status = request.POST.get('civil_status', 'Single')
+            interview.religion = request.POST.get('religion', '')
+            
+            # Family Background
+            interview.father_name = request.POST.get('father_name', '')
+            interview.father_occupation = request.POST.get('father_occupation', '')
+            interview.father_education = request.POST.get('father_education', '')
+            interview.mother_name = request.POST.get('mother_name', '')
+            interview.mother_occupation = request.POST.get('mother_occupation', '')
+            interview.mother_education = request.POST.get('mother_education', '')
+            interview.parents_marital_status = request.POST.get('parents_marital_status', '')
+            
+            # Educational Background
+            interview.elementary_school = request.POST.get('elementary_school', '')
+            interview.elementary_year_graduated = request.POST.get('elementary_year_graduated', '')
+            interview.high_school = request.POST.get('high_school', '')
+            interview.high_school_year_graduated = request.POST.get('high_school_year_graduated', '')
+            
+            # Interview Details
+            interview.reason_for_interview = request.POST.get('reason_for_interview', '')
+            interview.presenting_problem = request.POST.get('presenting_problem', '')
+            interview.background_of_problem = request.POST.get('background_of_problem', '')
+            interview.counselor_notes = request.POST.get('counselor_notes', '')
+            interview.recommendations = request.POST.get('recommendations', '')
+            interview.follow_up_needed = request.POST.get('follow_up_needed') == 'on'
+            interview.save()
+
+            # Update session status and details
+            session.status = 'completed'
+            session.time_ended = timezone.now()
+            session.problem_statement = interview.presenting_problem
+            session.recommendations = interview.recommendations
+            session.notes = interview.counselor_notes
+            session.save()
+
+            # Create follow-up if needed
+            if interview.follow_up_needed:
+                follow_up_date = timezone.now() + timezone.timedelta(days=14)  # Default to 2 weeks
+                FollowUp.objects.create(
+                    session=session,
+                    followup_date=follow_up_date,
+                    followup_notes="Follow-up session scheduled"
+                )
+
+            messages.success(request, 'Interview form completed successfully.')
+            return redirect('view_interview', interview_id=interview.id)
+            
+        except Exception as e:
+            messages.error(request, f'An error occurred while saving the form: {str(e)}')
+            return redirect('interview_form', interview_id=interview.id)
     
-    return redirect('counselor_session_history')
+    context = {
+        'interview': interview,
+        'student': interview.student,
+        'view_only': False
+    }
+    return render(request, 'counselor/interview_form.html', context)
+
+@login_required
+@user_passes_test(is_counselor)
+def view_interview(request, interview_id):
+    counselor = get_object_or_404(Counselor, user=request.user)
+    interview = get_object_or_404(Interview, id=interview_id, counselor=counselor)
+    context = {
+        'interview': interview,
+        'student': interview.student,
+        'view_only': True
+    }
+    return render(request, 'counselor/interview_form.html', context)
 
 @login_required
 @user_passes_test(is_counselor)
@@ -202,48 +283,6 @@ def create_interview(request, student_id):
     return render(request, 'counselor/create_interview.html', {
         'student': student
     })
-
-def interview_form(request, interview_id):
-    interview = get_object_or_404(Interview, id=interview_id)
-    session = interview.session
-    
-    if request.method == 'POST':
-        # Update interview details
-        interview.time_started = request.POST.get('time_started')
-        interview.time_ended = request.POST.get('time_ended')
-        interview.reason_for_interview = request.POST.get('interview_reason')
-        interview.presenting_problem = request.POST.get('problem_statement')
-        interview.counselor_notes = request.POST.get('interview_notes')
-        interview.recommendations = request.POST.get('recommendation')
-        interview.save()
-        
-        # End the guidance session
-        session.end_session(
-            problem_statement=request.POST.get('problem_statement'),
-            recommendations=request.POST.get('recommendation'),
-            notes=request.POST.get('interview_notes')
-        )
-        
-        messages.success(request, 'Interview form saved and session completed successfully.')
-        return redirect('counselor_session_history')
-        
-    context = {
-        'interview': interview,
-        'student': interview.student,
-        'session': session,
-        'view_only': False
-    }
-    return render(request, 'counselor/interview_form.html', context)
-
-def view_interview(request, interview_id):
-    interview = get_object_or_404(Interview, id=interview_id)
-    context = {
-        'interview': interview,
-        'student': interview.student,
-        'session': interview.session,
-        'view_only': True
-    }
-    return render(request, 'counselor/interview_form.html', context)
 
 @login_required
 def counselor_profile(request):

@@ -22,7 +22,6 @@ urlpatterns = [
     path('student/counselor/<int:counselor_id>/profile/', views.counselor_profile, name='counselor_profile'),
 
     # Counselor URLs
-    # path('counselor/appointments/', counselor_views.appointments, name='counselor_appointments'),
     path('counselor/dashboard/', counselor_views.counselor_dashboard, name='counselor_dashboard'),
     path('counselor/appointments/', counselor_views.counselor_appointment_list, name='counselor_appointment_list'),
     path('counselor/students/', counselor_views.counselor_student_list, name='counselor_student_list'),
@@ -31,10 +30,10 @@ urlpatterns = [
     path('counselor/appointments/<int:appointment_id>/approve/', counselor_views.approve_appointment, name='approve_appointment'),
     path('counselor/appointments/<int:appointment_id>/decline/', counselor_views.decline_appointment, name='decline_appointment'),
     path('counselor/appointments/<int:appointment_id>/start-session/', counselor_views.start_session, name='start_session'),
-    path('counselor/sessions/<int:session_id>/end/', counselor_views.end_session, name='end_session'),
     path('counselor/student/<int:student_id>/', counselor_views.student_profile, name='student_profile'),
-    path('counselor/student/<int:student_id>/create-interview/', counselor_views.create_interview, name='create_interview'),
     path('counselor/profile/', counselor_views.counselor_profile, name='counselor_profile'),
+    path('counselor/interview/<int:interview_id>/', counselor_views.interview_form, name='interview_form'),
+    path('counselor/interview/<int:interview_id>/view/', counselor_views.view_interview, name='view_interview'),
 
     path('interview/<int:interview_id>/', counselor_views.interview_form, name='interview_form'),
     path('interview/<int:interview_id>/', views.view_interview, name='view_interview'),
@@ -51,4 +50,9 @@ urlpatterns = [
     path('admin-panel/appointments/', admin_views.admin_appointments, name='admin_appointments'),
     path('admin-panel/reports/', admin_views.admin_reports, name='admin_reports'),
     path('admin-panel/settings/', admin_views.admin_settings, name='admin_settings'),
+
+    # Add more URLs as needed
+    path('interview/<int:session_id>/view/', views.view_completed_interview, name='view_completed_interview'),
+
+
 ]
