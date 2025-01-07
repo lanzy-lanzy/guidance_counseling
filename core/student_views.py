@@ -75,20 +75,19 @@ def student_counselor_list(request):
 @user_passes_test(is_student)
 def request_appointment(request):
     if request.method == 'POST':
-        student = get_object_or_404(Student, user=request.user)
+        student = Student.objects.get(user=request.user)
         counselor_id = request.POST.get('counselor')
-        date = request.POST.get('date')
-        time = request.POST.get('time')
+        appointment_date = request.POST.get('date') 
+        appointment_time = request.POST.get('time')
         purpose = request.POST.get('purpose')
         
         counselor = get_object_or_404(Counselor, id=counselor_id)
         
-        # Create appointment
         appointment = Appointment.objects.create(
             student=student,
             counselor=counselor,
-            date=date,
-            time=time,
+            date=appointment_date,
+            time=appointment_time,
             purpose=purpose,
             status='pending'
         )
